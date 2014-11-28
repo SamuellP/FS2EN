@@ -73,17 +73,17 @@ public class CsvFile {
         FileWriter fw = null;
         File f = null;
         
-        if(output.toString().contains("C:") || output.toString().contains("c:")){
-            if(output.toString().charAt(output.toString().length() - 1) == '\\' && output.toString().charAt(output.toString().length() - 2) == '\\')
-                f = new File(output + fileName);
-            else
-                f = new File(output + "\\\\" + fileName);
-        }else{
+        //if(output.toString().contains("C:") || output.toString().contains("c:")){
+        //    if(output.toString().charAt(output.toString().length() - 1) == '\\' && output.toString().charAt(output.toString().length() - 2) == '\\')
+        //        f = new File(output + fileName);
+        //    else
+        //        f = new File(output + "\\\\" + fileName);
+        //}else{
             if(output.toString().charAt(output.toString().length() - 1) == '/')
                 f = new File(output + fileName);
             else
                 f = new File(output + "/" + fileName);
-        }
+        //}
         
         fw = new FileWriter(f);
         

@@ -26,17 +26,17 @@ public class Converter {
             project = input[i].getName();
             project = project.replaceAll("csv", "arff");
             
-            if(output.toString().contains("C:") || output.toString().contains("c:")){
-                if(output.toString().charAt(output.toString().length() - 1) == '\\')
-                    saida = new File(output + project);
-                else
-                    saida = new File(output + "\\\\" + project);
-            }else{
+            //if(output.toString().contains("C:") || output.toString().contains("c:")){
+            //    if(output.toString().charAt(output.toString().length() - 1) == '\\')
+            //        saida = new File(output + project);
+            //    else
+            //        saida = new File(output + "\\\\" + project);
+            //}else{
                 if(output.toString().charAt(output.toString().length() - 1) == '/')
                     saida = new File(output + project);
                 else
                     saida = new File(output + "/" + project);
-            }
+            //}
             
             /** Carregando arquivo CSV **/
             csvLoader.setSource(input[0]);
