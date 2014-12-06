@@ -20,6 +20,7 @@ public class RunCsvFile {
     public static void main(String[] args) throws FileNotFoundException, IOException {
         /** Arquivo CSV a ser dividido **/
         File input = new File("/home/samuel/Documentos/BCC/Projeto/arquivos/visaoRicardoTotal_Limpo.csv");
+    
         /** Diretório para salvar os arquivos CSV gerados **/
         File output = new File("/home/samuel/Documentos/BCC/Projeto/arquivos_teste/saida/csv");
         
