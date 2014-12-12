@@ -52,7 +52,7 @@ public class CsvFile {
         fw.flush();
     }
     
-    public static String getProject(String s){
+    /*public static String getProject(String s){
         int cont = 0;
         String project = "";
         
@@ -64,6 +64,19 @@ public class CsvFile {
                     project += s.charAt(i);
                 }
             }
+        }
+        
+        return project;
+    }*/
+    
+    public static String getProject(String s){
+        int cont = 0;
+        String project = "";
+        int i = 0;
+        
+        while(s.charAt(i) != ','){
+            project = project + s.charAt(i);
+            i++;
         }
         
         return project;

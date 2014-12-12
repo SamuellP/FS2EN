@@ -18,11 +18,11 @@ public class RunConverter {
      */
     public static void main(String[] args) throws IOException {
         /** Diretório que contém os arquivos CSV a serem convertidos em ARFF **/
-        File directory = new File("/home/samuel/Documentos/BCC/Projeto/arquivos_teste/saida/csv");
+        File directory = new File("/home/samuel/Documentos/BCC/Projeto/arquivos_teste/saida/csv2");
         File[] csvFiles = directory.listFiles();
         
         /** Destino dos arquivos ARFF que serão gerados **/
-        File destination = new File("/home/samuel/Documentos/BCC/Projeto/arquivos_teste/saida/arff");
+        File destination = new File("/home/samuel/Documentos/BCC/Projeto/arquivos_teste/saida/arff2");
         
         new Converter().converterCsvToArff(csvFiles, destination);
     }

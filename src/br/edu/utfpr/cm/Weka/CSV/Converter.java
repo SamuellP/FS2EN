@@ -21,7 +21,7 @@ public class Converter {
         Instances data = null;
         String project = null;
         File saida = null;
-
+        
         for(int i=0;i<input.length;i++){
             project = input[i].getName();
             project = project.replaceAll("csv", "arff");
