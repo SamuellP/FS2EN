@@ -35,7 +35,6 @@ import weka.core.Range;
 public class WekaFS {
 
     public static void main(String[] args) throws IOException, Exception {
-              
         /*Folder containing the arff files*/
         //String folderName = "C:/ACER_D/ricardo/Mestrado/Mestrado/Teste de SW/Dissertação/weka/Arff/test/";
         //String folderName ="results/inputs_1/";
@@ -77,29 +76,30 @@ public class WekaFS {
                 System.out.println("Caramba: "+ obj[i].toString());
   */          
 
+            if(attsel == null)
+                System.out.println(f.getName());
+            else{
             
+                if(instances.numInstances() >= 5){
+                    //Original
+    //                attsel.SelectAttributes(instances);
+    //                System.out.println(attsel.toResultsString());
+                    // Fim Original
 
-            
-            
-            if(instances.numInstances() >= 5){
-                //Original
-//                attsel.SelectAttributes(instances);
-//                System.out.println(attsel.toResultsString());
-                // Fim Original
-                
-                System.out.println(attsel.toSummaryString()); //=== Summary ===
-                System.out.println(attsel.toClassDetailsString()); //=== Detailed Accuracy By Class ===                
-                System.out.println(attsel.toMatrixString()); //=== Confusion Matrix === 
-                
-                //System.out.println(attsel.toSummaryString(true));
-                //System.out.println(attsel.toCumulativeMarginDistributionString());
-                //FastVector fv = new FastVector();
-                
-                
-                //System.out.println(
-                
-            }else{
-                System.out.println("Not computed: Less than 5 instances....");
+                    System.out.println(attsel.toSummaryString()); //=== Summary ===
+                    System.out.println(attsel.toClassDetailsString()); //=== Detailed Accuracy By Class === 
+                    System.out.println(attsel.toMatrixString()); //=== Confusion Matrix === 
+
+                    //System.out.println(attsel.toSummaryString(true));
+                    //System.out.println(attsel.toCumulativeMarginDistributionString());
+                    //FastVector fv = new FastVector();
+
+
+                    //System.out.println(
+
+                }else{
+                    System.out.println("Not computed: Less than 5 instances....");
+                }
             }
         }
     }
@@ -137,68 +137,72 @@ public class WekaFS {
     }
 
     public static Evaluation runUsingAttributeSelectedClassifier(Instances instances) throws FileNotFoundException, IOException, Exception {
-        
-        //http://weka.wikispaces.com/Generating+classifier+evaluation+output+manually 
-        //http://www.programcreek.com/java-api-examples/index.php?api=weka.classifiers.trees.J48
-        
-        AttributeSelectedClassifier attsel = new AttributeSelectedClassifier();          
-        
-        CfsSubsetEval eval = new CfsSubsetEval();
-        eval.setLocallyPredictive(true);
-        eval.setMissingSeparate(false);
-        
-        BestFirst     search     = new BestFirst();
-        search.setLookupCacheSize(1);
-        search.setSearchTermination(5);
-        
-        J48 classifier = new J48();
-        float f = 0.25f;
-        
-        classifier.setBinarySplits(false);
-        classifier.setConfidenceFactor(f);
-        classifier.setDebug(false);
-        classifier.setMinNumObj(2); 
-        classifier.setNumFolds(3);
-        classifier.setReducedErrorPruning(false);
-        classifier.setSubtreeRaising(true);
-        classifier.setUnpruned(false);
-        classifier.setUseLaplace(false);
-        
-        attsel.setClassifier(classifier);
-        attsel.setEvaluator(eval);                       
-        attsel.setSearch(search);         
-        //attsel.setOptions(options);
-        
-        Evaluation evaluation=new Evaluation(instances);
-        
-        //String[] options = new String[2];
-        //options[0] = "-i";
-        //options[1] = "C:/ACER_D/ricardo/promisse selecionados/XXX/Feng/aff4.arff";
-        //System.out.println("NOSSA" + Evaluation.evaluateModel(new J48(), options));
-        
-        StringBuffer forPredictionsPrinting = new StringBuffer();
-        weka.core.Range attsToOutput = null; 
-        Boolean outputDistribution = true; 
+        try{
+            //http://weka.wikispaces.com/Generating+classifier+evaluation+output+manually 
+            //http://www.programcreek.com/java-api-examples/index.php?api=weka.classifiers.trees.J48
 
-        evaluation.crossValidateModel(attsel,instances,10,new Random(1),forPredictionsPrinting ,attsToOutput, outputDistribution);
-        
-        //System.out.println(forPredictionsPrinting);
-        
-        //System.out.println(evaluation.toSummaryString());
-        //System.out.println(evaluation.toMatrixString("OIA"));
-        //System.out.println(evaluation.toClassDetailsString("Teste"));
-        //System.out.println(evaluation.toClassDetailsString());
-            
-        //return attsel;
-     
-     //Imprimindo as informações " Attribute Selection on all input data " igual no WEKA
-        AttributeSelection as = new AttributeSelection();
-        as.setEvaluator(eval);
-        as.setSearch(search);
-        as.SelectAttributes(instances);
-        System.out.println(as.toResultsString());
-     //
-        
-        return evaluation;
+            AttributeSelectedClassifier attsel = new AttributeSelectedClassifier();          
+
+            CfsSubsetEval eval = new CfsSubsetEval();
+            eval.setLocallyPredictive(true);
+            eval.setMissingSeparate(false);
+
+            BestFirst     search     = new BestFirst();
+            search.setLookupCacheSize(1);
+            search.setSearchTermination(5);
+
+            J48 classifier = new J48();
+            float f = 0.25f;
+
+            classifier.setBinarySplits(false);
+            classifier.setConfidenceFactor(f);
+            classifier.setDebug(false);
+            classifier.setMinNumObj(2); 
+            classifier.setNumFolds(3);
+            classifier.setReducedErrorPruning(false);
+            classifier.setSubtreeRaising(true);
+            classifier.setUnpruned(false);
+            classifier.setUseLaplace(false);
+
+            attsel.setClassifier(classifier);
+            attsel.setEvaluator(eval);                       
+            attsel.setSearch(search);         
+            //attsel.setOptions(options);
+
+            Evaluation evaluation=new Evaluation(instances);
+
+            //String[] options = new String[2];
+            //options[0] = "-i";
+            //options[1] = "C:/ACER_D/ricardo/promisse selecionados/XXX/Feng/aff4.arff";
+            //System.out.println("NOSSA" + Evaluation.evaluateModel(new J48(), options));
+
+            StringBuffer forPredictionsPrinting = new StringBuffer();
+            weka.core.Range attsToOutput = null; 
+            Boolean outputDistribution = true; 
+
+            evaluation.crossValidateModel(attsel,instances,10,new Random(1),forPredictionsPrinting ,attsToOutput, outputDistribution);
+
+            //System.out.println(forPredictionsPrinting);
+
+            //System.out.println(evaluation.toSummaryString());
+            //System.out.println(evaluation.toMatrixString("OIA"));
+            //System.out.println(evaluation.toClassDetailsString("Teste"));
+            //System.out.println(evaluation.toClassDetailsString());
+
+            //return attsel;
+
+         //Imprimindo as informações " Attribute Selection on all input data " igual no WEKA
+            AttributeSelection as = new AttributeSelection();
+            as.setEvaluator(eval);
+            as.setSearch(search);
+            as.SelectAttributes(instances);
+            System.out.println(as.toResultsString());
+         //
+
+            return evaluation;
+        }catch(Exception e){
+            System.out.println("Erro para o arquivo: ");
+            return null;
+        }
     }
 }
