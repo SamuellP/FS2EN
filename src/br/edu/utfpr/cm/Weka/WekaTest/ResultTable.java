@@ -572,11 +572,15 @@ public class ResultTable {
      */
     public static void main(String[] args) throws IOException, Exception {
         /** Diretório contendo os arquivos arff **/
-        File directory = new File("/home/samuel/Documentos/BCC/Projeto/arquivos_teste/saida/arff3");
+        //Samuel File directory = new File("/home/samuel/Documentos/BCC/Projeto/arquivos_teste/saida/arff3");
+        //Ricardo
+        File directory = new File("C:/ACER_D/ricardo/Mestrado/Mestrado/Arquivos/Arff");
         File[] datasets = directory.listFiles();
         
         /** Diretório onde a tabela será salva **/
-        File output = new File("/home/samuel/Documentos/BCC/Projeto/arquivos_teste/saida/tabela.csv");
+        //Samuel File output = new File("/home/samuel/Documentos/BCC/Projeto/arquivos_teste/saida/tabela.csv");
+        //Ricardo 
+        File output = new File("C:/ACER_D/ricardo/Mestrado/Mestrado/Arquivos/Analise/tabela.csv");
         
         new ResultTable(AlgorithmsOptions.All).createResultTable(datasets,output);
     }
