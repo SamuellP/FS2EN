@@ -87,6 +87,9 @@ public class ResultTable {
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
                   code++;
+                  
+                  // Satin: Gerando log em tela de quanto já foi executado do programa!
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -108,6 +111,8 @@ public class ResultTable {
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
                   code++;
+                  // Satin: Gerando log em tela de quanto já foi executado do programa!
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -127,8 +132,10 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(1)) + ';' + 
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
-                  ';' + evaluation.numTruePositives(1) + ";" + "S\n");
+                  ';' + evaluation.numTruePositives(1) + ";" + "S\n");                
                   code++;
+                  // Satin: Gerando log em tela de quanto já foi executado do programa!
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -151,6 +158,8 @@ public class ResultTable {
                  ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                  ';' + evaluation.numTruePositives(1) + ";" + "S\n");
                  code++;
+                  // Satin: Gerando log em tela de quanto já foi executado do programa!
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                 
             }else{
                  System.out.println("Not computed: Less than 5 instances....");
             }
@@ -184,6 +193,8 @@ public class ResultTable {
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
                   code++;
+                  // Satin: Gerando log em tela de quanto já foi executado do programa!
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -205,6 +216,8 @@ public class ResultTable {
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
                   code++;
+                  // Satin: Gerando log em tela de quanto já foi executado do programa!
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -226,6 +239,8 @@ public class ResultTable {
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
                   code++;
+                  // Satin: Gerando log em tela de quanto já foi executado do programa!
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -248,6 +263,8 @@ public class ResultTable {
                  ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                  ';' + evaluation.numTruePositives(1) + ";" + "S\n");
                  code++;
+                  // Satin: Gerando log em tela de quanto já foi executado do programa!
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                 
             }else{
                  System.out.println("Not computed: Less than 5 instances....");
             }
@@ -281,6 +298,8 @@ public class ResultTable {
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
                   code++;
+                  // Satin: Gerando log em tela de quanto já foi executado do programa!
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -302,6 +321,8 @@ public class ResultTable {
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
                   code++;
+                  // Satin: Gerando log em tela de quanto já foi executado do programa!
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -323,6 +344,8 @@ public class ResultTable {
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
                   code++;
+                  // Satin: Gerando log em tela de quanto já foi executado do programa!
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -345,6 +368,8 @@ public class ResultTable {
                  ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                  ';' + evaluation.numTruePositives(1) + ";" + "S\n");
                  code++;
+                  // Satin: Gerando log em tela de quanto já foi executado do programa!
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                 
             }else{
                  System.out.println("Not computed: Less than 5 instances....");
             }
@@ -378,6 +403,8 @@ public class ResultTable {
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
                   code++;
+                  // Satin: Gerando log em tela de quanto já foi executado do programa!
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -399,6 +426,8 @@ public class ResultTable {
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
                   code++;
+                  // Satin: Gerando log em tela de quanto já foi executado do programa!
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -420,6 +449,8 @@ public class ResultTable {
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
                   code++;
+                  // Satin: Gerando log em tela de quanto já foi executado do programa!
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -442,6 +473,8 @@ public class ResultTable {
                  ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                  ';' + evaluation.numTruePositives(1) + ";" + "S\n");
                  code++;
+                  // Satin: Gerando log em tela de quanto já foi executado do programa!
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                 
             }else{
                  System.out.println("Not computed: Less than 5 instances....");
             }
@@ -475,6 +508,8 @@ public class ResultTable {
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
                   code++;
+                  // Satin: Gerando log em tela de quanto já foi executado do programa!
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -496,6 +531,8 @@ public class ResultTable {
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
                   code++;
+                  // Satin: Gerando log em tela de quanto já foi executado do programa!
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -517,6 +554,8 @@ public class ResultTable {
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
                   code++;
+                  // Satin: Gerando log em tela de quanto já foi executado do programa!
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -539,6 +578,8 @@ public class ResultTable {
                  ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                  ';' + evaluation.numTruePositives(1) + ";" + "S\n");
                  code++;
+                  // Satin: Gerando log em tela de quanto já foi executado do programa!
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                 
             }else{
                  System.out.println("Not computed: Less than 5 instances....");
             }
