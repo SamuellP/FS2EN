@@ -41,8 +41,11 @@ public class WekaFS {
         //String folderName = "C:/Arff/";
         //String folderName = "/home/samuel/Documentos/BCC/Projeto/arquivos_reunião";
         
-        String folderName = "/home/samuel/Documentos/BCC/Projeto/arquivos_teste/saida/arff2";
+        //Samuel
+        //String folderName = "/home/samuel/Documentos/BCC/Projeto/arquivos_teste/saida/arff2";
         
+        //Ricardo
+        String folderName = "C:/ACER_D/ricardo/Mestrado/Mestrado/Arquivos/tmp";
         
         File[] listOfFiles = WekaTest.getListOfFiles(folderName);
         for (File f : listOfFiles) {
