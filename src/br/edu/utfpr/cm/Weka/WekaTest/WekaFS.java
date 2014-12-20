@@ -9,7 +9,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
@@ -64,13 +67,13 @@ public class WekaFS {
             //AttributeSelection attsel = runUsingCSFEval(instances);
             
             System.out.println("===========================================");
-            System.out.print("Selected attributes for ");
+            System.out.print("0 - Selected attributes for ");
             System.out.println(f.getName());
             System.out.println("===========================================***");
             
             Evaluation attsel = runUsingAttributeSelectedClassifier(instances);                          
                       
-/*            FastVector resposta;
+            /*FastVector resposta;
             resposta = attsel.predictions();
             
             
@@ -88,18 +91,17 @@ public class WekaFS {
     //                attsel.SelectAttributes(instances);
     //                System.out.println(attsel.toResultsString());
                     // Fim Original
-
-                    System.out.println(attsel.toSummaryString()); //=== Summary ===
-                    System.out.println(attsel.toClassDetailsString()); //=== Detailed Accuracy By Class === 
-                    System.out.println(attsel.toMatrixString()); //=== Confusion Matrix === 
-
-                    //System.out.println(attsel.toSummaryString(true));
-                    //System.out.println(attsel.toCumulativeMarginDistributionString());
-                    //FastVector fv = new FastVector();
-
-
-                    //System.out.println(
-
+                    System.out.println("<C>");                    
+                    System.out.println("C: " + attsel.toSummaryString()); //=== Summary ===
+                    System.out.println("</C>");
+                    
+                    System.out.println("<D>");                                                            
+                    System.out.println("D: " + attsel.toClassDetailsString()); //=== Detailed Accuracy By Class === 
+                    System.out.println("</D>");                                                            
+                    
+                    System.out.println("<E>");                                                                                
+                    System.out.println("E: " + attsel.toMatrixString()); //=== Confusion Matrix === 
+                    System.out.println("</E>");                                                                                                    
                 }else{
                     System.out.println("Not computed: Less than 5 instances....");
                 }
@@ -141,9 +143,10 @@ public class WekaFS {
 
     public static Evaluation runUsingAttributeSelectedClassifier(Instances instances) throws FileNotFoundException, IOException, Exception {
         try{
-            //http://weka.wikispaces.com/Generating+classifier+evaluation+output+manually 
-            //http://www.programcreek.com/java-api-examples/index.php?api=weka.classifiers.trees.J48
-
+            //Ricardo - criei os elementos básicos para rodarmos um Ranker
+            GainRatioAttributeEval gr = new GainRatioAttributeEval();
+            Ranker ra = new Ranker(); 
+                                
             AttributeSelectedClassifier attsel = new AttributeSelectedClassifier();          
 
             CfsSubsetEval eval = new CfsSubsetEval();
@@ -168,16 +171,14 @@ public class WekaFS {
             classifier.setUseLaplace(false);
 
             attsel.setClassifier(classifier);
-            attsel.setEvaluator(eval);                       
-            attsel.setSearch(search);         
-            //attsel.setOptions(options);
+            
+            //Ricardo: Manual mesmo, aqui trocamos a seleção de atributos de um ranker ou cfs.
+            //attsel.setEvaluator(eval);                       
+            //attsel.setSearch(search);         
+            attsel.setEvaluator(gr);                       
+            attsel.setSearch(ra);         
 
             Evaluation evaluation=new Evaluation(instances);
-
-            //String[] options = new String[2];
-            //options[0] = "-i";
-            //options[1] = "C:/ACER_D/ricardo/promisse selecionados/XXX/Feng/aff4.arff";
-            //System.out.println("NOSSA" + Evaluation.evaluateModel(new J48(), options));
 
             StringBuffer forPredictionsPrinting = new StringBuffer();
             weka.core.Range attsToOutput = null; 
@@ -185,25 +186,33 @@ public class WekaFS {
 
             evaluation.crossValidateModel(attsel,instances,10,new Random(1),forPredictionsPrinting ,attsToOutput, outputDistribution);
 
-            //System.out.println(forPredictionsPrinting);
-
-            //System.out.println(evaluation.toSummaryString());
-            //System.out.println(evaluation.toMatrixString("OIA"));
-            //System.out.println(evaluation.toClassDetailsString("Teste"));
-            //System.out.println(evaluation.toClassDetailsString());
-
-            //return attsel;
-
-         //Imprimindo as informações " Attribute Selection on all input data " igual no WEKA
-            AttributeSelection as = new AttributeSelection();
-            as.setEvaluator(eval);
+            //Imprimindo as informações " Attribute Selection on all input data " igual no WEKA
+            //Ricardo: Aqui estou usando nossa nova implementação do Attribute Selection
+            AttributeSelection2 as = new AttributeSelection2();
+            //Ricardo: teste com CFS
+            as.setEvaluator(eval);            
             as.setSearch(search);
+            //Ricardo: Teste com Ranker
+            //as.setEvaluator(gr);
+            //as.setSearch(ra);            
             as.SelectAttributes(instances);
-            System.out.println(as.toResultsString());
-         //
+            
+            System.out.println(" <A> ");
+            System.out.println("A: " + as.toResultsString());
+            System.out.println(" </A> ");
+            
+            //ricardo
+            System.out.println("NR. de atributos selecionados: " + as.numberAttributesSelected());
 
+            //Ricardo: Chamo para mostrar os atributos, com o método que implementei, tanto para um quanto para outro
+            System.out.println(" <B> ");
+            System.out.println(as.getAttributsCFS(1));
+            //System.out.println(as.getAttributsRanker(1));
+            System.out.println(" </B> ");
+            
             return evaluation;
         }catch(Exception e){
+            e.printStackTrace();;
             System.out.println("Erro para o arquivo: ");
             return null;
         }
