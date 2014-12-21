@@ -15,6 +15,7 @@ import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.BestFirst;
 import weka.attributeSelection.CfsSubsetEval;
 import weka.attributeSelection.GainRatioAttributeEval;
+import weka.attributeSelection.InfoGainAttributeEval;
 import weka.attributeSelection.GeneticSearch;
 import weka.attributeSelection.GreedyStepwise;
 import weka.attributeSelection.Ranker;
@@ -37,7 +38,8 @@ public class ResultTable {
     public AttributeSelectedClassifier attsel = new AttributeSelectedClassifier();
     
     public CfsSubsetEval evalCfs = new CfsSubsetEval();
-    public ASEvaluation evalInfoGain = new GainRatioAttributeEval();
+    //public ASEvaluation evalInfoGain = new GainRatioAttributeEval(); Ricardo: não é o GainRatio que devemos usar e sim o InfoGain
+    public ASEvaluation evalInfoGain = new InfoGainAttributeEval();
     
     public BestFirst searchBestFirst = new BestFirst();
     public GreedyStepwise searchGreedyStepwise = new GreedyStepwise();
@@ -52,6 +54,8 @@ public class ResultTable {
     
     public Evaluation evaluation = null;
     
+    public AttributeSelection2 featsel = new AttributeSelection2(); // Satin: Nossa implementaçao da Classe!
+    
     public StringBuffer forPredictionsPrinting = new StringBuffer();
     public weka.core.Range attsToOutput = null; 
     public Boolean outputDistribution = true;
@@ -61,9 +65,20 @@ public class ResultTable {
     public ResultTable(AlgorithmsOptions option){
         this.option = option;
     }
+
+    public void writeFields(int code, FileWriter fields, String dataset, Instances instances, CfsSubsetEval eval, BestFirst search) throws IOException {
+        try {
+            featsel.setEvaluator(eval);            
+            featsel.setSearch(search);
+            featsel.SelectAttributes(instances);           
+            fields.write(featsel.getAttributsCFS(code, dataset));
+        } catch (Exception e) {            
+            System.out.println("Erro na geração dos fields: Code: " + code + " dataset: " + dataset);
+        }
+    }
     
-    public void runNaiveBayes(File dataset, FileWriter table) throws IOException{
-        DecimalFormat df = new DecimalFormat("#.00");
+    public void runNaiveBayes(File dataset, FileWriter table, FileWriter fields) throws IOException{
+        DecimalFormat df = new DecimalFormat("#.000");
             
         try{
             Instances instances = new Instances(new FileReader(dataset));
@@ -86,10 +101,11 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
-                  code++;
+
+                  writeFields(code,fields,dataset.getName(),instances, this.evalCfs, this.searchBestFirst); // gravando os campos
                   
-                  // Satin: Gerando log em tela de quanto já foi executado do programa!
-                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName()); // Satin: Gerando log em tela de quanto já foi executado do programa!
+                  code++;
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -110,9 +126,8 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
-                  code++;
-                  // Satin: Gerando log em tela de quanto já foi executado do programa!
-                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
+                  code++;                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -133,9 +148,8 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");                
-                  code++;
-                  // Satin: Gerando log em tela de quanto já foi executado do programa!
-                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
+                  code++;                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -157,9 +171,8 @@ public class ResultTable {
                  df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                  ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                  ';' + evaluation.numTruePositives(1) + ";" + "S\n");
-                 code++;
-                  // Satin: Gerando log em tela de quanto já foi executado do programa!
-                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                 
+                 System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
+                 code++;                  
             }else{
                  System.out.println("Not computed: Less than 5 instances....");
             }
@@ -192,9 +205,8 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
-                  code++;
-                  // Satin: Gerando log em tela de quanto já foi executado do programa!
-                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
+                  code++;                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -215,9 +227,8 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
-                  code++;
-                  // Satin: Gerando log em tela de quanto já foi executado do programa!
-                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
+                  code++;                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -238,9 +249,8 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
-                  code++;
-                  // Satin: Gerando log em tela de quanto já foi executado do programa!
-                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
+                  code++;                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -262,9 +272,8 @@ public class ResultTable {
                  df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                  ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                  ';' + evaluation.numTruePositives(1) + ";" + "S\n");
-                 code++;
-                  // Satin: Gerando log em tela de quanto já foi executado do programa!
-                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                 
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
+                  code++;                  
             }else{
                  System.out.println("Not computed: Less than 5 instances....");
             }
@@ -297,9 +306,8 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
-                  code++;
-                  // Satin: Gerando log em tela de quanto já foi executado do programa!
-                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
+                  code++;                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -320,9 +328,8 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
-                  code++;
-                  // Satin: Gerando log em tela de quanto já foi executado do programa!
-                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
+                  code++;                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -343,9 +350,8 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
-                  code++;
-                  // Satin: Gerando log em tela de quanto já foi executado do programa!
-                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
+                  code++;                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -367,9 +373,8 @@ public class ResultTable {
                  df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                  ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                  ';' + evaluation.numTruePositives(1) + ";" + "S\n");
-                 code++;
-                  // Satin: Gerando log em tela de quanto já foi executado do programa!
-                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                 
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
+                  code++;                  
             }else{
                  System.out.println("Not computed: Less than 5 instances....");
             }
@@ -402,9 +407,8 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
-                  code++;
-                  // Satin: Gerando log em tela de quanto já foi executado do programa!
-                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
+                  code++;                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -425,9 +429,8 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
-                  code++;
-                  // Satin: Gerando log em tela de quanto já foi executado do programa!
-                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
+                  code++;                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -448,9 +451,8 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
-                  code++;
-                  // Satin: Gerando log em tela de quanto já foi executado do programa!
-                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
+                  code++;                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -472,9 +474,8 @@ public class ResultTable {
                  df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                  ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                  ';' + evaluation.numTruePositives(1) + ";" + "S\n");
-                 code++;
-                  // Satin: Gerando log em tela de quanto já foi executado do programa!
-                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                 
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
+                  code++;                  
             }else{
                  System.out.println("Not computed: Less than 5 instances....");
             }
@@ -507,9 +508,8 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
-                  code++;
-                  // Satin: Gerando log em tela de quanto já foi executado do programa!
-                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
+                  code++;                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -530,9 +530,8 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
-                  code++;
-                  // Satin: Gerando log em tela de quanto já foi executado do programa!
-                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
+                  code++;                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -553,9 +552,8 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
-                  code++;
-                  // Satin: Gerando log em tela de quanto já foi executado do programa!
-                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                  
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
+                  code++;                  
             }else{
                   System.out.println("Not computed: Less than 5 instances....");
             }
@@ -577,9 +575,8 @@ public class ResultTable {
                  df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                  ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                  ';' + evaluation.numTruePositives(1) + ";" + "S\n");
-                 code++;
-                  // Satin: Gerando log em tela de quanto já foi executado do programa!
-                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());                 
+                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
+                  code++;                  
             }else{
                  System.out.println("Not computed: Less than 5 instances....");
             }
@@ -588,13 +585,14 @@ public class ResultTable {
         }
     }
             
-    public void createResultTable(File[] datasets, File output) throws IOException, Exception{
+    public void createResultTable(File[] datasets, File output, File fields) throws IOException, Exception{
             FileWriter fw = new FileWriter(output);
+            FileWriter fd = new FileWriter(fields);
             fw.write("Código;Dataset;Algoritmo;Attribute/Evaluator;Search/Method;Total/Instancias;Instâncias/Corretas;%/Corret.;Instâncias/Incorretas;%/Incorret.;ROC/Buggy;ROC/Clean;a;a;b;b;Atributos\n");
             
             for(File f: datasets){
                 if(option == AlgorithmsOptions.NaiveBayes || option == AlgorithmsOptions.All)
-                    runNaiveBayes(f,fw);
+                    runNaiveBayes(f,fw,fd);
                 if(option == AlgorithmsOptions.RandomForest || option == AlgorithmsOptions.All)
                     runRandomForest(f,fw);
                 if(option == AlgorithmsOptions.SimpleLogistic || option == AlgorithmsOptions.All)
@@ -606,6 +604,7 @@ public class ResultTable {
             }
             
             fw.flush();
+            fd.flush();
     }
 
     /**
@@ -615,14 +614,15 @@ public class ResultTable {
         /** Diretório contendo os arquivos arff **/
         //Samuel File directory = new File("/home/samuel/Documentos/BCC/Projeto/arquivos_teste/saida/arff3");
         //Ricardo
-        File directory = new File("C:/ACER_D/ricardo/Mestrado/Mestrado/Arquivos/Arff");
+        File directory = new File("C:/ACER_D/ricardo/Mestrado/Mestrado/Arquivos/tmp");
         File[] datasets = directory.listFiles();
         
         /** Diretório onde a tabela será salva **/
         //Samuel File output = new File("/home/samuel/Documentos/BCC/Projeto/arquivos_teste/saida/tabela.csv");
         //Ricardo 
         File output = new File("C:/ACER_D/ricardo/Mestrado/Mestrado/Arquivos/Analise/tabela.csv");
+        File fields = new File("C:/ACER_D/ricardo/Mestrado/Mestrado/Arquivos/Analise/fields.csv");
         
-        new ResultTable(AlgorithmsOptions.All).createResultTable(datasets,output);
+        new ResultTable(AlgorithmsOptions.All).createResultTable(datasets,output,fields);
     }
 }
