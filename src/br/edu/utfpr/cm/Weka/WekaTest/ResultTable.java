@@ -572,7 +572,7 @@ public class ResultTable {
      */
     public static void main(String[] args) throws IOException, Exception {
         /** Diretório contendo os arquivos arff **/
-        File directory = new File("/home/samuel/Documentos/BCC/Projeto/arquivos_teste/saida/arff3");
+        File directory = new File("/home/samuel/Documentos/BCC/Projeto/arquivos_teste/saida/arff4");
         File[] datasets = directory.listFiles();
         
         /** Diretório onde a tabela será salva **/
