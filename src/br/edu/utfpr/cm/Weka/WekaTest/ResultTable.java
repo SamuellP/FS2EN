@@ -37,13 +37,23 @@ public class ResultTable {
     
     public AttributeSelectedClassifier attsel = new AttributeSelectedClassifier();
     
-    public CfsSubsetEval evalCfs = new CfsSubsetEval();
+    // Ricardo - alteração dos tipos dos algotimos de pesquisa
+    //public CfsSubsetEval evalCfs = new CfsSubsetEval();
     //public ASEvaluation evalInfoGain = new GainRatioAttributeEval(); Ricardo: não é o GainRatio que devemos usar e sim o InfoGain
-    public ASEvaluation evalInfoGain = new InfoGainAttributeEval();
+    //public ASEvaluation evalInfoGain = new InfoGainAttributeEval();
+
+    public ASEvaluation evalCfs = new CfsSubsetEval();
+    public ASEvaluation evalInfoGain = new InfoGainAttributeEval();    
     
-    public BestFirst searchBestFirst = new BestFirst();
-    public GreedyStepwise searchGreedyStepwise = new GreedyStepwise();
-    public GeneticSearch searchGeneticSearch = new GeneticSearch();
+    
+            
+    // Ricardo - Alteração da declaração dos algoritmos de pesquisa de atributos
+    //public BestFirst searchBestFirst = new BestFirst();
+    //public GreedyStepwise searchGreedyStepwise = new GreedyStepwise();
+    //public GeneticSearch searchGeneticSearch = new GeneticSearch();
+    public ASSearch searchBestFirst = new BestFirst();
+    public ASSearch searchGreedyStepwise = new GreedyStepwise();
+    public ASSearch searchGeneticSearch = new GeneticSearch();
     public ASSearch searchRanker = new Ranker();
     
     public NaiveBayes classifierNaiveBayes = new NaiveBayes();
@@ -66,13 +76,22 @@ public class ResultTable {
         this.option = option;
     }
 
-    public void writeFields(int code, FileWriter fields, String dataset, Instances instances, CfsSubsetEval eval, BestFirst search) throws IOException {
+    public void writeFields(int code, FileWriter fields, String dataset, Instances instances, ASEvaluation eval, ASSearch search, String nome1, String nome2) throws IOException {
         try {
-            featsel.setEvaluator(eval);            
-            featsel.setSearch(search);
-            featsel.SelectAttributes(instances);           
-            fields.write(featsel.getAttributsCFS(code, dataset));
-        } catch (Exception e) {            
+            if (eval instanceof CfsSubsetEval) {
+                featsel.setEvaluator(eval);
+                featsel.setSearch(search);
+                featsel.SelectAttributes(instances);
+                fields.write(featsel.getAttributsCFS(code, dataset, nome1, nome2));
+            } else if (eval instanceof InfoGainAttributeEval) {
+                featsel.setEvaluator(eval);
+                featsel.setSearch(search);
+                featsel.SelectAttributes(instances);
+                fields.write(featsel.getAttributsRanker(code, dataset, nome1, nome2));                
+            } else {
+                throw new Exception("Tem Aliem aqui.");
+            }
+        } catch (Exception e) {
             System.out.println("Erro na geração dos fields: Code: " + code + " dataset: " + dataset);
         }
     }
@@ -102,7 +121,7 @@ public class ResultTable {
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
 
-                  writeFields(code,fields,dataset.getName(),instances, this.evalCfs, this.searchBestFirst); // gravando os campos
+                  writeFields(code,fields,dataset.getName(),instances, this.evalCfs, this.searchBestFirst, "CFS", "BestFirst"); // gravando os campos
                   
                   System.out.println("instância processada:" + code + " nome: " + dataset.getName()); // Satin: Gerando log em tela de quanto já foi executado do programa!
                   code++;
@@ -126,6 +145,8 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
+                
+                  writeFields(code,fields,dataset.getName(),instances, this.evalCfs, this.searchGreedyStepwise, "CFS","GreedyStepwise"); // gravando os campos
                   System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
                   code++;                  
             }else{
@@ -148,6 +169,7 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");                
+                  writeFields(code,fields,dataset.getName(),instances, this.evalCfs, this.searchGeneticSearch, "CFS", "GeneticSearch"); // gravando os campos                 
                   System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
                   code++;                  
             }else{
@@ -171,6 +193,7 @@ public class ResultTable {
                  df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                  ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                  ';' + evaluation.numTruePositives(1) + ";" + "S\n");
+                 writeFields(code,fields,dataset.getName(),instances, this.evalInfoGain, this.searchRanker, "InfoGain", "Ranker"); // gravando os campos                                  
                  System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
                  code++;                  
             }else{
@@ -181,7 +204,7 @@ public class ResultTable {
         }
     }
     
-    public void runRandomForest(File dataset,FileWriter table){
+    public void runRandomForest(File dataset,FileWriter table, FileWriter fields){
         DecimalFormat df = new DecimalFormat("#.00");
             
         try{
@@ -205,6 +228,7 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
+                  writeFields(code,fields,dataset.getName(),instances, this.evalCfs, this.searchBestFirst, "CFS", "BestFirst"); // gravando os campos                                                  
                   System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
                   code++;                  
             }else{
@@ -227,6 +251,7 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
+                  writeFields(code,fields,dataset.getName(),instances, this.evalCfs, this.searchGreedyStepwise, "CFS", "GreedyStepwise"); // gravando os campos                                                                  
                   System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
                   code++;                  
             }else{
@@ -249,6 +274,7 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
+                  writeFields(code,fields,dataset.getName(),instances, this.evalCfs, this.searchGeneticSearch, "CFS","GeneticSearch"); // gravando os campos                                                  
                   System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
                   code++;                  
             }else{
@@ -272,6 +298,7 @@ public class ResultTable {
                  df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                  ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                  ';' + evaluation.numTruePositives(1) + ";" + "S\n");
+                  writeFields(code,fields,dataset.getName(),instances, this.evalInfoGain, this.searchRanker, "InfoGain", "Ranker"); // gravando os campos                                                  
                   System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
                   code++;                  
             }else{
@@ -282,7 +309,7 @@ public class ResultTable {
         }
     }
     
-    public void runSimpleLogistic(File dataset, FileWriter table){
+    public void runSimpleLogistic(File dataset, FileWriter table, FileWriter fields){
         DecimalFormat df = new DecimalFormat("#.00");
             
         try{
@@ -306,6 +333,7 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
+                  writeFields(code,fields,dataset.getName(),instances, this.evalCfs, this.searchBestFirst, "CFS", "BestFirst"); // gravando os campos                                                  
                   System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
                   code++;                  
             }else{
@@ -328,6 +356,7 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
+                  writeFields(code,fields,dataset.getName(),instances, this.evalCfs, this.searchGreedyStepwise, "CFS", "GreedyStepwise"); // gravando os campos                                                                  
                   System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
                   code++;                  
             }else{
@@ -350,6 +379,7 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
+                  writeFields(code,fields,dataset.getName(),instances, this.evalCfs, this.searchGeneticSearch, "CFS", "GeneticSearch"); // gravando os campos                                                                   
                   System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
                   code++;                  
             }else{
@@ -373,6 +403,7 @@ public class ResultTable {
                  df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                  ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                  ';' + evaluation.numTruePositives(1) + ";" + "S\n");
+                  writeFields(code,fields,dataset.getName(),instances, this.evalInfoGain, this.searchRanker, "InfoGain", "Ranker"); // gravando os campos                                                                   
                   System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
                   code++;                  
             }else{
@@ -383,7 +414,7 @@ public class ResultTable {
         }
     }
     
-    public void runJ48(File dataset, FileWriter table){
+    public void runJ48(File dataset, FileWriter table, FileWriter fields){
         DecimalFormat df = new DecimalFormat("#.00");
             
         try{
@@ -407,6 +438,7 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
+                  writeFields(code,fields,dataset.getName(),instances, this.evalCfs, this.searchBestFirst, "CFS", "BestFirst"); // gravando os campos                                                                  
                   System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
                   code++;                  
             }else{
@@ -429,6 +461,7 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
+                  writeFields(code,fields,dataset.getName(),instances, this.evalCfs, this.searchGreedyStepwise, "CFS", "GreedyStepwise"); // gravando os campos                                                                  
                   System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
                   code++;                  
             }else{
@@ -451,6 +484,7 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
+                  writeFields(code,fields,dataset.getName(),instances, this.evalCfs, this.searchGeneticSearch, "CFS", "GeneticSearch"); // gravando os campos                                                                   
                   System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
                   code++;                  
             }else{
@@ -474,6 +508,7 @@ public class ResultTable {
                  df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                  ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                  ';' + evaluation.numTruePositives(1) + ";" + "S\n");
+                  writeFields(code,fields,dataset.getName(),instances, this.evalInfoGain, this.searchRanker, "InfoGain", "Ranker"); // gravando os campos                                                                   
                   System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
                   code++;                  
             }else{
@@ -484,7 +519,7 @@ public class ResultTable {
         }
     }
     
-    public void runDecisionTable(File dataset, FileWriter table){
+    public void runDecisionTable(File dataset, FileWriter table, FileWriter fields){
         DecimalFormat df = new DecimalFormat("#.00");
             
         try{
@@ -508,6 +543,7 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
+                  writeFields(code,fields,dataset.getName(),instances, this.evalCfs, this.searchBestFirst, "CFS", "BestFirst"); // gravando os campos                                                                  
                   System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
                   code++;                  
             }else{
@@ -530,6 +566,7 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
+                  writeFields(code,fields,dataset.getName(),instances, this.evalCfs, this.searchGreedyStepwise, "CFS","GreedyStepwise"); // gravando os campos                                                                  
                   System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
                   code++;                  
             }else{
@@ -552,6 +589,7 @@ public class ResultTable {
                   df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                   ';' + evaluation.numTruePositives(1) + ";" + "S\n");
+                  writeFields(code,fields,dataset.getName(),instances, this.evalCfs, this.searchGeneticSearch, "CFS", "GeneticSearch"); // gravando os campos                                                                   
                   System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
                   code++;                  
             }else{
@@ -575,6 +613,7 @@ public class ResultTable {
                  df.format(evaluation.areaUnderROC(0)) + ';' + evaluation.numTrueNegatives(1) + 
                  ';' + evaluation.numFalsePositives(0) + ';' + evaluation.numFalseNegatives(0) + 
                  ';' + evaluation.numTruePositives(1) + ";" + "S\n");
+                  writeFields(code,fields,dataset.getName(),instances, this.evalInfoGain, this.searchRanker, "InfoGain", "Ranker"); // gravando os campos                                                                   
                   System.out.println("instância processada:" + code + " nome: " + dataset.getName());// Satin: Gerando log em tela de quanto já foi executado do programa!
                   code++;                  
             }else{
@@ -594,13 +633,13 @@ public class ResultTable {
                 if(option == AlgorithmsOptions.NaiveBayes || option == AlgorithmsOptions.All)
                     runNaiveBayes(f,fw,fd);
                 if(option == AlgorithmsOptions.RandomForest || option == AlgorithmsOptions.All)
-                    runRandomForest(f,fw);
+                    runRandomForest(f,fw, fd);
                 if(option == AlgorithmsOptions.SimpleLogistic || option == AlgorithmsOptions.All)
-                    runSimpleLogistic(f,fw);
+                    runSimpleLogistic(f,fw, fd);
                 if(option == AlgorithmsOptions.J48 || option == AlgorithmsOptions.All)
-                    runJ48(f,fw);
+                    runJ48(f,fw, fd);
                 if(option == AlgorithmsOptions.DecisionTable || option == AlgorithmsOptions.All)
-                    runDecisionTable(f,fw);
+                    runDecisionTable(f,fw, fd);
             }
             
             fw.flush();
