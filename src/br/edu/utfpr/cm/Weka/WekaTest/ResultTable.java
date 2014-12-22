@@ -64,7 +64,7 @@ public class ResultTable {
     
     public Evaluation evaluation = null;
     
-    public AttributeSelection2 featsel = new AttributeSelection2(); // Satin: Nossa implementaçao da Classe!
+    public AttributeSelection2 featsel = null; // Satin: Nossa implementaçao da Classe!
     
     public StringBuffer forPredictionsPrinting = new StringBuffer();
     public weka.core.Range attsToOutput = null; 
@@ -78,6 +78,8 @@ public class ResultTable {
 
     public void writeFields(int code, FileWriter fields, String dataset, Instances instances, ASEvaluation eval, ASSearch search, String nome1, String nome2) throws IOException {
         try {
+            featsel = null;                            
+            featsel = new AttributeSelection2(); // Satin: Nossa implementaçao da Classe!            
             if (eval instanceof CfsSubsetEval) {
                 featsel.setEvaluator(eval);
                 featsel.setSearch(search);
