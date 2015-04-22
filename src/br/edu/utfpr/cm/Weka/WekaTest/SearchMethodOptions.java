@@ -6,19 +6,18 @@ package br.edu.utfpr.cm.Weka.WekaTest;
 
 /**
  *
- * @author samuel
+ * @author RicardoSatinVostro
  */
-public enum AlgorithmsOptions {
-    NaiveBayes(0), 
-    RandomForest(1),
-    SimpleLogistic(2),
-    J48(3),
-    DecisionTable(4),
-    All(5);
+public enum SearchMethodOptions {
+    BestFirst (1),
+    GreedyStepwise(2), 
+    GeneticSearch(3),
+    Ranker(4),
+    All(0);    
     
     private int option;
     
-    AlgorithmsOptions(int option){
+    SearchMethodOptions(int option){
         this.setOption(option);
     }
     
@@ -31,16 +30,14 @@ public enum AlgorithmsOptions {
     }
     
     public String getOptionToString(){
-        if(this.option == 0)
-            return "NaiveBayes";
-        else if(this.option == 1)
-            return "RandomForest";
+        if(this.option == 1)
+            return "BestFirst";
         else if(this.option == 2)
-            return "SimpleLogistic";
+            return "GreedyStepwise";
         else if(this.option == 3)
-            return "J48";
+            return "GeneticSearch";
         else if(this.option == 4)
-            return "DecisionTable";
+            return "Ranker";
         return null;
     }
 }
