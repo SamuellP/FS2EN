@@ -206,8 +206,8 @@ public class WekaFS {
 
             //Ricardo: Chamo para mostrar os atributos, com o método que implementei, tanto para um quanto para outro
             System.out.println(" <B> ");
-            System.out.println(as.getAttributsCFS(1,"arquivo", "evaluator", "search"));
-            //System.out.println(as.getAttributsRanker(1,"arquivo", "evaluator", "search"));
+            System.out.println(as.getAttributsCFS(1,"teste"));
+            //System.out.println(as.getAttributsRanker(1));
             System.out.println(" </B> ");
             
             return evaluation;

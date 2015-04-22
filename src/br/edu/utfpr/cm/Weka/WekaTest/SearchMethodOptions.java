@@ -27,7 +27,6 @@ public enum SearchMethodOptions {
     
     public void setOption(int option){
         this.option = option;
-<<<<<<< HEAD
     }
     
     public String getOptionToString(){
@@ -41,7 +40,4 @@ public enum SearchMethodOptions {
             return "Ranker";
         return null;
     }
-=======
-    }           
->>>>>>> 553418117f68c76cbf42844e7d8f1546a8366c43
 }
