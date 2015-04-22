@@ -101,7 +101,11 @@ public class AttributeSelection2 implements Serializable, RevisionHandler {
    * 
    * @return String with Attributs
    */ 
+<<<<<<< HEAD
     public String getAttributsCFS(int pk, String dataset, String classifierName, String evalName, String searchName) throws Exception{
+=======
+    public String getAttributsCFS(int pk, String dataset, String evaluator, String search) throws Exception{
+>>>>>>> 553418117f68c76cbf42844e7d8f1546a8366c43
         int i = 0;
         
         String retorno="";
@@ -110,8 +114,14 @@ public class AttributeSelection2 implements Serializable, RevisionHandler {
             if (this.m_nameselectedAttributeSet[i][0] != null) {
                 retorno = retorno + (String.valueOf(pk) +";"         // chave de ligação com cada arquivos que estará sendo processado
                         + dataset                               + ";" // dataset que está sendo processado!
+<<<<<<< HEAD
                         + classifierName + ";" + evalName + ";" + searchName + ";"
                         //+ this.m_nameselectedAttributeSet[i][0] + ";" // nome do processo, se CFS ou Ranker. assim podemos fazer um csv só!
+=======
+                        + evaluator                             + ";" // Evaluator!
+                        + search                                + ";" // Search!                                                
+                        + this.m_nameselectedAttributeSet[i][0] + ";" // nome do processo, se CFS ou Ranker. assim podemos fazer um csv só!
+>>>>>>> 553418117f68c76cbf42844e7d8f1546a8366c43
                         + this.m_nameselectedAttributeSet[i][1] + ";"// índice do atributo que foi selecionado
                         + this.m_nameselectedAttributeSet[i][2] + ";"// nome do atributo que foi selecionado
                         + this.m_nameselectedAttributeSet[i][3]) + "\n";// quando rodamos ranker, o valor do atributo. quando cfs, será NULL
@@ -125,14 +135,16 @@ public class AttributeSelection2 implements Serializable, RevisionHandler {
    * 
    * @return String with Attributs
    */
-    public String getAttributsRanker(int pk) throws Exception{
+    public String getAttributsRanker(int pk, String dataset, String evaluator, String search) throws Exception{
         int i = 0;
         String retorno="";
         
         for (i = 0; i < this.m_nameselectedAttributeSet.length; i++) {
             if (this.m_nameselectedAttributeSet[i][3] != null && Float.valueOf(this.m_nameselectedAttributeSet[i][3]) > 0F) {                
-                System.out.println(this.m_nameselectedAttributeSet[i][3]);
                 retorno = retorno + (String.valueOf(pk)         + ";" // chave de ligação com cada arquivos que estará sendo processado
+                        + dataset                               + ";" // dataset que está sendo processado!
+                        + evaluator                             + ";" // Evaluator!
+                        + search                                + ";" // Search!                        
                         + this.m_nameselectedAttributeSet[i][0] + ";" // nome do processo, se CFS ou Ranker. assim podemos fazer um csv só!
                         + this.m_nameselectedAttributeSet[i][1] + ";" // índice do atributo que foi selecionado
                         + this.m_nameselectedAttributeSet[i][2] + ";" // nome do atributo que foi selecionado
