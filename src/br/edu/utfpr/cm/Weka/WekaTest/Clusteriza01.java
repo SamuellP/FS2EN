@@ -260,9 +260,11 @@ public class Clusteriza01 {
         
         System.out.println("Inicializando memória");
 
-        cl.inicializaArquivo("C:/ACER_D/ricardo/Mestrado/Mestrado/Arquivos/Analise/23-12-14/arquivos.csv");
+        //cl.inicializaArquivo("C:/ACER_D/ricardo/Mestrado/Mestrado/Arquivos/Analise/23-12-14/arquivos.csv");
+        cl.inicializaArquivo("/home/samuel/Documentos/Projeto/arquivos_reuniao_13.01.15/arquivos.csv");
         System.out.println("---Arquivos carregados");
-        cl.inicializaCampos ("C:/ACER_D/ricardo/Mestrado/Mestrado/Arquivos/Analise/23-12-14/atributosComAlgoritmo.csv");
+        //cl.inicializaCampos ("C:/ACER_D/ricardo/Mestrado/Mestrado/Arquivos/Analise/23-12-14/atributosComAlgoritmo.csv");
+        cl.inicializaCampos ("/home/samuel/Documentos/Projeto/arquivos_reuniao_13.01.15/atributosComAlgoritmo.csv");
         System.out.println("---Atributos carregados");
         System.out.println("Memória inicializada");
         

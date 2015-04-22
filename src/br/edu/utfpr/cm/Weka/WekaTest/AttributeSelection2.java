@@ -6,6 +6,7 @@ package br.edu.utfpr.cm.Weka.WekaTest;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Random;
 import weka.attributeSelection.ASEvaluation;
@@ -118,7 +119,36 @@ public class AttributeSelection2 implements Serializable, RevisionHandler {
             }
         }
         return retorno;
-    }  
+    }
+    
+    public String getAttributsCFS(String dataset, String classifierName, String evalName, String searchName) throws Exception{
+        int i = 0;
+        
+        String retorno="";
+        
+        for (i = 0; i < this.m_nameselectedAttributeSet.length; i++) {
+            if (this.m_nameselectedAttributeSet[i][0] != null) {
+                retorno = retorno + 
+                        dataset + ";" + // dataset que está sendo processado
+                        classifierName + ";" + evalName + ";" + searchName + ";" + 
+                        this.m_nameselectedAttributeSet[i][1] + ";" +
+                        this.m_nameselectedAttributeSet[i][2] + "\n"; // Nome do atributo que foi selecionado
+            }
+        }
+        return retorno;
+    }
+    
+    public ArrayList<String> getAttributsCFS(){
+        int i;
+        ArrayList<String> attributs = new ArrayList<String>();
+        
+        for(i = 0; i < this.m_nameselectedAttributeSet.length; i++){
+            if(this.m_nameselectedAttributeSet[i][0] != null)
+                attributs.add(this.m_nameselectedAttributeSet[i][2]);
+        }
+        
+        return attributs;
+    }
 
     /**
    * Returns attributs by CFS.

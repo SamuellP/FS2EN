@@ -45,10 +45,10 @@ public class WekaFS {
         //String folderName = "/home/samuel/Documentos/BCC/Projeto/arquivos_reunião";
         
         //Samuel
-        String folderName = "/home/samuel/Documentos/BCC/Projeto/arquivos_teste/saida/arff3";
+        //String folderName = "/home/samuel/Documentos/BCC/Projeto/arquivos_teste/saida/arff2";
         
         //Ricardo
-        //String folderName = "C:/ACER_D/ricardo/Mestrado/Mestrado/Arquivos/tmp";
+        String folderName = "C:/ACER_D/ricardo/Mestrado/Mestrado/Arquivos/tmp";
         
         File[] listOfFiles = WekaTest.getListOfFiles(folderName);
         for (File f : listOfFiles) {
@@ -206,13 +206,13 @@ public class WekaFS {
 
             //Ricardo: Chamo para mostrar os atributos, com o método que implementei, tanto para um quanto para outro
             System.out.println(" <B> ");
-            System.out.println(as.getAttributsCFS(1,"teste"));
-            //System.out.println(as.getAttributsRanker(1));
+            //System.out.println(as.getAttributsCFS(1,"arquivo", "evaluator", "search"));
+            //System.out.println(as.getAttributsRanker(1,"arquivo", "evaluator", "search"));
             System.out.println(" </B> ");
             
             return evaluation;
         }catch(Exception e){
-            e.printStackTrace();
+            e.printStackTrace();;
             System.out.println("Erro para o arquivo: ");
             return null;
         }

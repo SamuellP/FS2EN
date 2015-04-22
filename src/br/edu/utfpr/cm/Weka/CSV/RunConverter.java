@@ -18,12 +18,13 @@ public class RunConverter {
      */
     public static void main(String[] args) throws IOException {
         /** Diretório que contém os arquivos CSV a serem convertidos em ARFF **/
-        File directory = new File("/home/samuel/Documentos/BCC/Projeto/arquivos_teste/saida/csv2");
+        //File directory = new File("/home/samuel/Documentos/BCC/Projeto/arquivos_teste/saida/csv2");
+        File directory = new File("/home/samuel/Documentos/BCC/5° Semestre/Inteligência Artificial/atividade_comparacao_KNN_svm_arvoreDeDecisao/DecisionTree");
         File[] csvFiles = directory.listFiles();
         
         /** Destino dos arquivos ARFF que serão gerados **/
-        File destination = new File("/home/samuel/Documentos/BCC/Projeto/arquivos_teste/saida/arff2");
-        
+        //File destination = new File("/home/samuel/Documentos/BCC/Projeto/arquivos_teste/saida/arff2");
+        File destination = new File("/home/samuel/Documentos/BCC/5° Semestre/Inteligência Artificial/atividade_comparacao_KNN_svm_arvoreDeDecisao");
         new Converter().converterCsvToArff(csvFiles, destination);
     }
 }

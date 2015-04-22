@@ -37,7 +37,7 @@ public class ResultTable {
     
     public AttributeSelectedClassifier attsel = new AttributeSelectedClassifier();
     
-    public AttributeSelection2 featsel = new AttributeSelection2(); // Satin: Nossa implementaçao da Classe!
+    public AttributeSelection2 featsel; //= new AttributeSelection2(); // Satin: Nossa implementaçao da Classe!
     
     private StringBuffer forPredictionsPrinting = new StringBuffer();
     private weka.core.Range attsToOutput = null; 
@@ -72,6 +72,7 @@ public class ResultTable {
 
     public void writeFields(int code, FileWriter fields, String dataset, Instances instances, ASEvaluation eval, ASSearch search, String classifierName, String evalName, String searchName) throws IOException {
         try {
+            this.featsel = new AttributeSelection2();
             featsel.setEvaluator(eval);            
             featsel.setSearch(search);
             featsel.SelectAttributes(instances);           
@@ -83,6 +84,7 @@ public class ResultTable {
     
     public void run(File dataset, FileWriter table, FileWriter fields, Classifier classifier, ASEvaluation eval, ASSearch search, String ao, String aeo, String smo){
         DecimalFormat df = new DecimalFormat("#.000");
+        String line = "";
         
         try{
             
@@ -97,22 +99,26 @@ public class ResultTable {
             evaluation.crossValidateModel(attsel,instances,10,new Random(1),this.forPredictionsPrinting ,this.attsToOutput, this.outputDistribution);
 
             if(instances.numInstances() >= 5){
-                table.write(evaluation.numInstances() + ";" + 
+                line += code + ";" + dataset.getName() + ';' + ao + ";" + aeo + ";" + smo + ";";
+                
+                line += evaluation.numInstances() + ";" + 
                   evaluation.correct() + ";" + df.format(evaluation.pctCorrect()) + ";" + 
                   evaluation.incorrect() + ";" + df.format(evaluation.pctIncorrect()) + ";" + 
-                  df.format(evaluation.truePositiveRate(1)) + ";" + 
                   df.format(evaluation.truePositiveRate(0)) + ";" + 
-                  df.format(evaluation.falsePositiveRate(1)) + ";" +  
+                  df.format(evaluation.truePositiveRate(1)) + ";" + 
                   df.format(evaluation.falsePositiveRate(0)) + ";" +  
-                  df.format(evaluation.precision(1)) + ";" +  df.format(evaluation.precision(0)) + ";" +  
-                  df.format(evaluation.recall(1)) + ";" +  df.format(evaluation.recall(0)) + ";" +  
-                  df.format(evaluation.fMeasure(1)) + ";" +  df.format(evaluation.fMeasure(0)) + ";" + 
-                  df.format(evaluation.areaUnderROC(1)) + ";" + 
-                  df.format(evaluation.areaUnderROC(0)) + ";" + evaluation.numTrueNegatives(1) + 
+                  df.format(evaluation.falsePositiveRate(1)) + ";" +  
+                  df.format(evaluation.precision(0)) + ";" +  df.format(evaluation.precision(1)) + ";" +  
+                  df.format(evaluation.recall(0)) + ";" +  df.format(evaluation.recall(1)) + ";" +  
+                  df.format(evaluation.fMeasure(0)) + ";" +  df.format(evaluation.fMeasure(1)) + ";" + 
+                  df.format(evaluation.areaUnderROC(0)) + ";" + 
+                  df.format(evaluation.areaUnderROC(1)) + ";" + evaluation.numTrueNegatives(1) + 
                   ';' + evaluation.numFalsePositives(0) + ";" + evaluation.numFalseNegatives(0) + 
-                  ';' + evaluation.numTruePositives(1) + ";" + "S\n");
-                  
-                  writeFields(code,fields,dataset.getName(),instances, eval, search, ao, aeo, smo); // gravando os campos
+                  ';' + evaluation.numTruePositives(1) + ";" + "S\n";
+                
+                table.write(line);  
+
+                writeFields(code,fields,dataset.getName(),instances, eval, search, ao, aeo, smo); // gravando os campos
                   
                   System.out.println("instância processada:" + code + " nome: " + dataset.getName()); // Satin: Gerando log em tela de quanto já foi executado do programa!
                   code++;
@@ -121,7 +127,8 @@ public class ResultTable {
             }
             
         }catch(Exception e){
-            System.out.println("Tratando exceção para o arquivo: ");
+            System.out.println("Tratando exceção para o arquivo: " + dataset.getName());
+            return;
         }
     }
     
@@ -129,62 +136,62 @@ public class ResultTable {
     public void createResultTable(File[] datasets, File output, File fields) throws IOException, Exception{
             FileWriter fw = new FileWriter(output);
             FileWriter fd = new FileWriter(fields);
-            fw.write("Codigo;Dataset;Algoritmo;AttributeEvaluator;SearchMethod;TotalInstancias;InstânciasCorretas;%Corret.;InstânciasIncorretas;%Incorret.;TP-RateBuggy;TP-RateClean;FP-RateBuggy;FP-RateClean;PrecisionBuggy;PrecisionClean;RecallBuggy;RecallClean;F-MeasureBuggy;F-MeasureClean;ROCBuggy;ROCClean;a;a;b;b;Atributos\n");
+            fw.write("Codigo;Dataset;Algoritmo;AttributeEvaluator;SearchMethod;TotalInstancias;InstanciasCorretas;%Corret.;InstanciasIncorretas;%Incorret.;TP-RateBuggy;TP-RateClean;FP-RateBuggy;FP-RateClean;PrecisionBuggy;PrecisionClean;RecallBuggy;RecallClean;F-MeasureBuggy;F-MeasureClean;ROCBuggy;ROCClean;a;a;b;b;Atributos\n");
             fd.write("Codigo;Dataset;Algoritmo;AttributeEvaluator;SearchMethod;IndexField;Feature;Ranking\n");
             for(File f: datasets){
                 if(option == AlgorithmsOptions.NaiveBayes || option == AlgorithmsOptions.All){
                     //runNaiveBayes(f,fw,fd);
-                    fw.write(code + ";" + f.getName() + ';' + "NaiveBayes;" + "CFS;BestFirst;");
+                    //fw.write(code + ";" + f.getName() + ';' + "NaiveBayes;" + "CFS;BestFirst;");
                     run(f,fw,fd,this.classifierNaiveBayes,this.evalCfs,this.searchBestFirst, "NaiveBayes", "CFS", "BestFirst");
-                    fw.write(code + ";" + f.getName() + ';' + "NaiveBayes;" + "CFS;GreedyStepwise;");
+                    //fw.write(code + ";" + f.getName() + ';' + "NaiveBayes;" + "CFS;GreedyStepwise;");
                     run(f,fw,fd,this.classifierNaiveBayes,this.evalCfs,this.searchGreedyStepwise, "NaiveBayes", "CFS", "GreedyStepwise");
-                    fw.write(code + ";" + f.getName() + ';' + "NaiveBayes;" + "CFS;GeneticSearch;");
+                    //fw.write(code + ";" + f.getName() + ';' + "NaiveBayes;" + "CFS;GeneticSearch;");
                     run(f,fw,fd,this.classifierNaiveBayes,this.evalCfs,this.searchGeneticSearch, "NaiveBayes", "CFS", "GeneticSearch");
-                    fw.write(code + ";" + f.getName() + ';' + "NaiveBayes;" + "InfoGain;Ranker;");
+                    //fw.write(code + ";" + f.getName() + ';' + "NaiveBayes;" + "InfoGain;Ranker;");
                     run(f,fw,fd,this.classifierNaiveBayes,this.evalInfoGain,this.searchRanker, "NaiveBayes", "InfoGain", "Ranker");
                 }
                 if(option == AlgorithmsOptions.RandomForest || option == AlgorithmsOptions.All){
                     //runRandomForest(f,fw);
-                    fw.write(code + ";" + f.getName() + ';' + "RandomForest;" + "CFS;BestFirst;");
+                    //fw.write(code + ";" + f.getName() + ';' + "RandomForest;" + "CFS;BestFirst;");
                     run(f,fw,fd,this.classifierRandomForest,this.evalCfs,this.searchBestFirst, "RandomForest", "CFS", "BestFirst");
-                    fw.write(code + ";" + f.getName() + ';' + "RandomForest;" + "CFS;GreedyStepwise;");
+                    //fw.write(code + ";" + f.getName() + ';' + "RandomForest;" + "CFS;GreedyStepwise;");
                     run(f,fw,fd,this.classifierRandomForest,this.evalCfs,this.searchGreedyStepwise, "RandomForest", "CFS", "GreedyStepwise");
-                    fw.write(code + ";" + f.getName() + ';' + "RandomForest;" + "CFS;GeneticSearch;");
+                    //fw.write(code + ";" + f.getName() + ';' + "RandomForest;" + "CFS;GeneticSearch;");
                     run(f,fw,fd,this.classifierRandomForest,this.evalCfs,this.searchGeneticSearch, "RandomForest", "CFS", "GeneticSearch");
-                    fw.write(code + ";" + f.getName() + ';' + "RandomForest;" + "InfoGain;Ranker;");
+                    //fw.write(code + ";" + f.getName() + ';' + "RandomForest;" + "InfoGain;Ranker;");
                     run(f,fw,fd,this.classifierRandomForest,this.evalInfoGain,this.searchRanker, "RandomForest", "InfoGain", "Ranker");
                 }
                 if(option == AlgorithmsOptions.SimpleLogistic || option == AlgorithmsOptions.All){
                     //runSimpleLogistic(f,fw);
-                    fw.write(code + ";" + f.getName() + ';' + "SimpleLogistic;" + "CFS;BestFirst;");
+                    //fw.write(code + ";" + f.getName() + ';' + "SimpleLogistic;" + "CFS;BestFirst;");
                     run(f,fw,fd,this.classifierSimpleLogistic,this.evalCfs,this.searchBestFirst, "SimpleLogistic", "CFS", "BestFirst");
-                    fw.write(code + ";" + f.getName() + ';' + "SimpleLogistic;" + "CFS;GreedyStepwise;");
+                    //fw.write(code + ";" + f.getName() + ';' + "SimpleLogistic;" + "CFS;GreedyStepwise;");
                     run(f,fw,fd,this.classifierSimpleLogistic,this.evalCfs,this.searchGreedyStepwise, "SimpleLogistic", "CFS", "GreedyStepwise");
-                    fw.write(code + ";" + f.getName() + ';' + "SimpleLogistic;" + "CFS;GeneticSearch;");
+                    //fw.write(code + ";" + f.getName() + ';' + "SimpleLogistic;" + "CFS;GeneticSearch;");
                     run(f,fw,fd,this.classifierSimpleLogistic,this.evalCfs,this.searchGeneticSearch, "SimpleLogistic", "CFS", "GeneticSearch");
-                    fw.write(code + ";" + f.getName() + ';' + "SimpleLogistic;" + "InfoGain;Ranker;");
+                    //fw.write(code + ";" + f.getName() + ';' + "SimpleLogistic;" + "InfoGain;Ranker;");
                     run(f,fw,fd,this.classifierSimpleLogistic,this.evalInfoGain,this.searchRanker, "SimpleLogistic", "InfoGain", "Ranker");
                 }
                 if(option == AlgorithmsOptions.J48 || option == AlgorithmsOptions.All){
                     //runJ48(f,fw);
-                    fw.write(code + ";" + f.getName() + ';' + "J48;" + "CFS;BestFirst;");
+                    //fw.write(code + ";" + f.getName() + ';' + "J48;" + "CFS;BestFirst;");
                     run(f,fw,fd,this.classifierJ48,this.evalCfs,this.searchBestFirst, "J48", "CFS", "BestFirst");
-                    fw.write(code + ";" + f.getName() + ';' + "J48;" + "CFS;GreedyStepwise;");
+                    //fw.write(code + ";" + f.getName() + ';' + "J48;" + "CFS;GreedyStepwise;");
                     run(f,fw,fd,this.classifierJ48,this.evalCfs,this.searchGreedyStepwise, "J48", "CFS", "GreedyStepwise");
-                    fw.write(code + ";" + f.getName() + ';' + "J48;" + "CFS;GeneticSearch;");
+                    //fw.write(code + ";" + f.getName() + ';' + "J48;" + "CFS;GeneticSearch;");
                     run(f,fw,fd,this.classifierJ48,this.evalCfs,this.searchGeneticSearch, "J48", "CFS", "GeneticSearch");
-                    fw.write(code + ";" + f.getName() + ';' + "J48;" + "InfoGain;Ranker;");
+                    //fw.write(code + ";" + f.getName() + ';' + "J48;" + "InfoGain;Ranker;");
                     run(f,fw,fd,this.classifierJ48,this.evalInfoGain,this.searchRanker, "J48", "InfoGain", "Ranker");
                 }
                 if(option == AlgorithmsOptions.DecisionTable || option == AlgorithmsOptions.All){
                     //runDecisionTable(f,fw);
-                    fw.write(code + ";" + f.getName() + ';' + "DecisionTable;" + "CFS;BestFirst;");
+                    //fw.write(code + ";" + f.getName() + ';' + "DecisionTable;" + "CFS;BestFirst;");
                     run(f,fw,fd,this.classifierDecisionTable,this.evalCfs,this.searchBestFirst, "DecisionTable", "CFS", "BestFirst");
-                    fw.write(code + ";" + f.getName() + ';' + "DecisionTable;" + "CFS;GreedyStepwise;");
+                    //fw.write(code + ";" + f.getName() + ';' + "DecisionTable;" + "CFS;GreedyStepwise;");
                     run(f,fw,fd,this.classifierDecisionTable,this.evalCfs,this.searchGreedyStepwise, "DecisionTable", "CFS", "GreedyStepwise");
-                    fw.write(code + ";" + f.getName() + ';' + "DecisionTable;" + "CFS;GeneticSearch;");
+                    //fw.write(code + ";" + f.getName() + ';' + "DecisionTable;" + "CFS;GeneticSearch;");
                     run(f,fw,fd,this.classifierDecisionTable,this.evalCfs,this.searchGeneticSearch, "DecisionTable", "CFS", "GeneticSearch");
-                    fw.write(code + ";" + f.getName() + ';' + "DecisionTable;" + "InfoGain;Ranker;");
+                    //fw.write(code + ";" + f.getName() + ';' + "DecisionTable;" + "InfoGain;Ranker;");
                     run(f,fw,fd,this.classifierDecisionTable,this.evalInfoGain,this.searchRanker, "DecisionTable", "InfoGain", "Ranker");
                 }
             }
@@ -200,7 +207,7 @@ public class ResultTable {
         /** Diretório contendo os arquivos arff **/
         
         //Samuel 
-        File directory = new File("/home/samuel/Documentos/BCC/Projeto/arquivos_teste/saida/arffTeste");
+        File directory = new File("/home/samuel/Documentos/BCC/Projeto/arquivos_teste/saida/ARFF");
         
         //Ricardo
         //File directory = new File("C:/ACER_D/ricardo/Mestrado/Mestrado/Arquivos/tmp");
@@ -217,6 +224,6 @@ public class ResultTable {
         //File output = new File("C:/ACER_D/ricardo/Mestrado/Mestrado/Arquivos/Analise/tabela.csv");
         //File fields = new File("C:/ACER_D/ricardo/Mestrado/Mestrado/Arquivos/Analise/fields.csv");
         
-        new ResultTable(AlgorithmsOptions.All).createResultTable(datasets,output,fields);
+        new ResultTable(AlgorithmsOptions.RandomForest).createResultTable(datasets,output,fields);
     }
 }
