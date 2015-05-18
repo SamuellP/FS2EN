@@ -25,6 +25,7 @@ public final class Clusteriza {
 
     private ArrayList<Element> elements;
     private HashMap<Integer, Cluster> clusters;
+    private HashMap<Double, Cluster> subClusters;
     public AlgorithmsOptions aOptions;
     public AttributeEvaluatorOptions aeOptions; // opções de avaliadores de atributo - para clusterizar
     public SearchMethodOptions smOptions;// opções de pesquisa de atributo - para clusterizar 
@@ -48,6 +49,22 @@ public final class Clusteriza {
         
         new FileGenerator(aoOptions, aeOptions, smOptions).generateRocFileAndAttributeFile(datasets, this.file, this.features, this.attributesForClustering);
         initialize(aoOptions, aeOptions, smOptions);
+    }
+    
+    Clusteriza(AlgorithmsOptions aoOptions, File[] datasets, File file, AttributesForClustering attributes) throws FileNotFoundException, IOException, Exception {
+        this.elements = new ArrayList<Element>();
+        this.clusters = null;
+        this.aOptions = aoOptions;
+        this.aeOptions = null;
+        this.smOptions = null;
+        this.datasets = datasets;
+        this.file = file;
+        this.features = null;
+        
+        this.attributesForClustering = attributes;
+        
+        new FileGenerator(aoOptions, null, null).generateRocFile(datasets, this.file, this.attributesForClustering);
+        initialize(aoOptions, null, null);
     }
     /*
     public void initializeElements(File[] datasets, String algoritmo, String attributeEvaluator, String searchMethod) throws IOException, Exception{
@@ -89,10 +106,13 @@ public final class Clusteriza {
         double precision;
         double recall;
         double fMeasure;
-
-        BufferedReader brFeatures = new BufferedReader(new FileReader(this.features));
-
-        HashMap<String, ArrayList<String>> hash = loadFeatures(aoOptions, aeOptions, smOptions);
+        
+        BufferedReader brFeatures = null;
+        HashMap<String, ArrayList<String>> hash = null;
+        if(this.features != null){
+            brFeatures = new BufferedReader(new FileReader(this.features));
+            hash = loadFeatures(aoOptions, aeOptions, smOptions);
+        }
 
         while (br.ready()) {
             line = br.readLine();
@@ -113,14 +133,18 @@ public final class Clusteriza {
                 Element e = new Element(dataset, algoritmo, attributeEvaluator, searchMethod, roc, precision, recall, fMeasure);
                 e.setPath(path);
                 //loadFeatures(e, dataset, algoritmo, attributeEvaluator, searchMethod);
-                if (hash.containsKey(dataset)) {// Verificando se o vetor em questão possui atributos
+                if (hash != null && hash.containsKey(dataset)) {// Verificando se o vetor em questão possui atributos
                     e.features = hash.get(dataset);
                     e.amountFeatures = hash.get(dataset).size();
+                    this.elements.add(e);
+                }else{
+                    e.features = null;
+                    e.amountFeatures = 0;
                     this.elements.add(e);
                 }
             }
         }
-        hash.clear();
+        if(hash != null) hash.clear();
     }
 
     public void loadFeatures2(Element element, String d, String a, String ae, String sm) throws FileNotFoundException, IOException {
@@ -290,7 +314,7 @@ public final class Clusteriza {
         }
     }
 
-    public void writeResults(File output) throws IOException {
+    public void writeResultsClusters(File output) throws IOException {
         if (this.clusters == null) {
             System.out.println("Nenhum cluster foi formado!");
             return;
@@ -315,6 +339,40 @@ public final class Clusteriza {
 
         for (Integer key : this.clusters.keySet()) {
             Cluster cluster = this.clusters.get(key);
+            for (Element e : cluster.getVectors()) {
+                fw.write(key + ";" + e.getDataset() + ";" + e.getAlgoritmo() + ";"
+                        + e.getAttributeEvaluator() + ";" + e.getSearchMethod() + ";" + df.format(e.getRoc()) + "\n");
+            }
+            fw.write("\n");
+        }
+        fw.flush();
+    }
+    
+    public void writeResultsSubClusters(File output) throws IOException {
+        if (this.subClusters == null) {
+            System.out.println("Nenhum sub-cluster foi formado!");
+            return;
+        }
+
+        DecimalFormat df = new DecimalFormat("#.000000");
+
+        FileWriter fw = new FileWriter(output);
+
+        fw.write("ClustersFormados:\n");
+        fw.write("Cluster;Centroide;Coesao\n");
+
+        for (Double key : this.subClusters.keySet()) {
+            Cluster cluster = this.subClusters.get(key);
+            fw.write(key + ";" + df.format(cluster.getCentroid()) + ";" + df.format(cluster.getCohesion()) + "\n");
+        }
+        
+        df = new DecimalFormat("#.000");
+
+        fw.write("\n\n\n");
+        fw.write("Cluster;Dataset;Algoritmo;AttributeEvaluator;SearchMethod;Roc\n");
+
+        for (Double key : this.subClusters.keySet()) {
+            Cluster cluster = this.subClusters.get(key);
             for (Element e : cluster.getVectors()) {
                 fw.write(key + ";" + e.getDataset() + ";" + e.getAlgoritmo() + ";"
                         + e.getAttributeEvaluator() + ";" + e.getSearchMethod() + ";" + df.format(e.getRoc()) + "\n");
@@ -409,6 +467,105 @@ public final class Clusteriza {
         }
         
         return false;
+    }
+    
+    public HashMap<Double,Cluster> compareFeatures() {
+        HashMap<Double,Cluster> subClusters = new HashMap<Double,Cluster>();
+        HashMap<String,ArrayList<Element>> clustersFormed = new HashMap<String,ArrayList<Element>>();
+        ArrayList<Element> clusteredElements = new ArrayList<Element>();
+        Cluster cluster;
+        Element e1, e2;
+        String commonFeatures;
+        Scanner read = new Scanner(System.in);
+        Scanner scanner;
+        Integer maximumFeatures = Integer.MIN_VALUE;
+        Integer min, max, qtdFeatures;
+        double a = 1.0, b = 0.1;
+        
+        try{
+            System.out.println("Limite inferior: ");
+            min = read.nextInt();
+            System.out.println("Limite superior: ");
+            max = read.nextInt();
+            
+            for(Integer key: this.clusters.keySet()){
+                cluster = this.clusters.get(key);
+                a += 1.0;
+                b = 0.1;
+                
+                for(int i = max; i >= min; i--){
+                    
+                    for(int j = 0; j < cluster.getQtdVectors(); j++){
+                        e1 = cluster.getVectors().get(j);
+                        if(e1.getAmountFeatures() >= i && !clusteredElements.contains(e1)){
+                            for(int k = j + 1; k < cluster.getQtdVectors(); k++){
+                                e2 = cluster.getVectors().get(k);
+                                if(e2.getAmountFeatures() >= i && !clusteredElements.contains(e2)){
+                                    commonFeatures = "";
+                                    qtdFeatures = 0;
+                                    for(String s: e1.getFeatures()){
+                                        if(qtdFeatures < i && e2.getFeatures().contains(s)){
+                                            if(commonFeatures.equals("")) commonFeatures += s;
+                                            else commonFeatures += "#" + s;
+                                            qtdFeatures++;
+                                        }
+                                        if(qtdFeatures == i) break;
+                                    }
+                                    
+                                    if(qtdFeatures >= i){
+                                        if(!clusteredElements.contains(e1)) clusteredElements.add(e1);
+                                        clusteredElements.add(e2);
+                                        if(clustersFormed.containsKey(commonFeatures)){
+                                            if(!clustersFormed.get(commonFeatures).contains(e1))
+                                                clustersFormed.get(commonFeatures).add(e1);
+                                            clustersFormed.get(commonFeatures).add(e2);
+                                        }else{
+                                            clustersFormed.put(commonFeatures, new ArrayList<Element>());
+                                            clustersFormed.get(commonFeatures).add(e1);
+                                            clustersFormed.get(commonFeatures).add(e2);
+                                        }
+                                    }
+                                    commonFeatures = "";
+                                    qtdFeatures = 0;
+                                    
+                                }
+                            }
+                            
+                        }
+                    }
+                    
+                    for(String features: clustersFormed.keySet()){
+                        ArrayList<String> list = new ArrayList<String>();
+                        scanner = new Scanner(features);
+                        scanner.useDelimiter("#");
+                        while(scanner.hasNext()){
+                            list.add(scanner.next());
+                        }
+                        Cluster c = new Cluster();
+                        c.setCommonFeatures(list);
+                        for(Element e: clustersFormed.get(features)){
+                            c.addVector(e);
+                        }
+                        System.out.println("\n***\n" + (key+b) + "\n" + list.size() + "\n" + c.getQtdVectors());
+                        
+                        c.recalculateCentroid();
+                        c.recalculateDistanceVectors();
+                        c.calculateCohesion();
+                        
+                        subClusters.put(key+b, c);
+                        System.out.println(subClusters.get(key+b).getCommonFeatures());
+                        
+                        b += 0.1;
+                    }
+                    clustersFormed.clear();
+                }
+            }
+            
+        }catch(Exception e){
+            System.out.println("Erro durante o refinamento das features!");
+        }finally{
+            return subClusters;
+        }
     }
     
     public void compareFeatures(File resultCompareFeatures) throws IOException {
@@ -613,6 +770,16 @@ public final class Clusteriza {
     public SearchMethodOptions getSearchMethodOptions(){
         return this.smOptions;
     }
+
+    public HashMap<Double, Cluster> getSubClusters() {
+        return subClusters;
+    }
+
+    public void setSubClusters(HashMap<Double, Cluster> subClusters) {
+        this.subClusters = subClusters;
+    }
+    
+    
     
     public int getAmountOfDatasetsClustered(){
         int counter = 0;
@@ -636,28 +803,49 @@ public final class Clusteriza {
         File resultCompareFeatures = new File("/home/samuel/Documentos/BCC/Projeto/arquivos_reuniao_23.02.15/CompareFeatures.csv");
         /** Arquivo para armazenar os resultados das simulações com o cluster **/
         File simulationResult = new File("/home/samuel/Documentos/BCC/Projeto/arquivos_reuniao_23.02.15/SimulationResult.csv");
-
-        Clusteriza clusteriza = new Clusteriza(AlgorithmsOptions.NaiveBayes, AttributeEvaluatorOptions.CFS, SearchMethodOptions.GeneticSearch, datasets, file, features, AttributesForClustering.Roc);
+        
+        Scanner read = new Scanner(System.in);
+        
+        Clusteriza clusteriza = null;
         
         double toleranceValue = 0.034;
         int qtdMaxCluster = 10000000;
-
-        clusteriza.clusters = new BSAS().runBSAS(clusteriza.elements, toleranceValue, qtdMaxCluster);
-        clusteriza.calculateCohesion();
-
-        //clusteriza.clusterList();
-        clusteriza.writeResults(results);
-
-        // Os valores 1 e 5 é o intervalo com o qual o programa vai procurar features em comum //
-        //clusteriza.compareFeatures(1, 50, resultCompareFeatures);
-        Scanner read = new Scanner(System.in);
-        System.out.println("Deseja aplicar o refinamento das features? 0 - Não 1 - Sim");
-        if(read.nextInt() == 1)
-            clusteriza.compareFeatures(resultCompareFeatures);
         
-        System.out.println("Deseja gerar simulação com os clusters? 0 - Não 1 - Sim");
-        if(read.nextInt() == 1)
-            new InformationGroups().generateInformationGroups(clusteriza, simulationResult);
+        System.out.println("Deseja aplicar CLASSIFICAÇÃO com FEATURE SELECTION? 0 - Não 1 - Sim");
+        if(read.nextInt() == 1){ // Com feature selection
+            clusteriza = new Clusteriza(AlgorithmsOptions.NaiveBayes, AttributeEvaluatorOptions.CFS, SearchMethodOptions.GeneticSearch, datasets, file, features, AttributesForClustering.Roc);
+            //clusteriza = new Clusteriza(AlgorithmsOptions.RandomForest, datasets, file, AttributesForClustering.Roc);
+
+            clusteriza.clusters = new BSAS().runBSAS(clusteriza.elements, toleranceValue, qtdMaxCluster);
+            clusteriza.calculateCohesion();
+
+            //clusteriza.clusterList();
+            clusteriza.writeResultsClusters(results);
+
+            // Os valores 1 e 5 é o intervalo com o qual o programa vai procurar features em comum //
+            //clusteriza.compareFeatures(1, 50, resultCompareFeatures);
+            System.out.println("Deseja aplicar o refinamento das features? 0 - Não 1 - Sim");
+            if(read.nextInt() == 1){
+                clusteriza.subClusters = clusteriza.compareFeatures();
+                clusteriza.writeResultsSubClusters(resultCompareFeatures);
+                //clusteriza.compareFeatures(resultCompareFeatures);
+            }
+
+            System.out.println("Deseja gerar simulação com os clusters? 0 - Não 1 - Sim");
+            if(read.nextInt() == 1)
+                new InformationGroups().generateInformationGroups(clusteriza, simulationResult);
+        }else{ // Sem feature selection
+            
+            //clusteriza = new Clusteriza(AlgorithmsOptions.NaiveBayes, AttributeEvaluatorOptions.CFS, SearchMethodOptions.GeneticSearch, datasets, file, features, AttributesForClustering.Roc);
+            clusteriza = new Clusteriza(AlgorithmsOptions.NaiveBayes, datasets, file, AttributesForClustering.Roc);
+
+            clusteriza.clusters = new BSAS().runBSAS(clusteriza.elements, toleranceValue, qtdMaxCluster);
+            clusteriza.calculateCohesion();
+
+            //clusteriza.clusterList();
+            clusteriza.writeResultsClusters(results);
+            
+        }
         
         System.out.println("Deseja aplicar cross-project prediction? 0 - Não 1 - Sim");
         if(read.nextInt() == 1){

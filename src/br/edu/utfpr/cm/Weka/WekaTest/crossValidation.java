@@ -28,6 +28,7 @@ import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.functions.SimpleLogistic;
+import weka.classifiers.meta.AttributeSelectedClassifier;
 import weka.classifiers.rules.DecisionTable;
 import weka.classifiers.trees.J48;
 import weka.classifiers.trees.RandomForest;
@@ -189,6 +190,7 @@ public class crossValidation {
         }
     }
     
+    /** CROSS-PROJECT PREDICTION sem FEATURE SELECTION **/
     public void runCrossValidation(HashMap<Integer,Cluster> clusters, HashMap<Integer,File> tests, HashMap<Integer,File> trains, Classifier classifier, String classifierOption, String attributeEvaluatorOptions, String searchEvaluatorOptions, FileWriter result, FileWriter relation, HashMap<Integer,Double> rocFilesTests) throws FileNotFoundException, IOException, Exception{
         File train;
         File test;
@@ -224,6 +226,49 @@ public class crossValidation {
         }
     }
     
+    /** CROSS-PROJECT PREDICTION com FEATURE SELECTION **/
+    public void runCrossValidation(HashMap<Integer,Cluster> clusters, HashMap<Integer,File> tests, HashMap<Integer,File> trains, Classifier classifier, ASEvaluation evaluation, ASSearch search, String classifierOption, String attributeEvaluatorOptions, String searchEvaluatorOptions, FileWriter result, FileWriter relation, HashMap<Integer,Double> rocFilesTests) throws FileNotFoundException, IOException, Exception{
+        File train;
+        File test;
+        Instances trainInstances;
+        Instances testInstances;
+        AttributeSelectedClassifier attsel;
+        Evaluation eval;
+        DecimalFormat df = new DecimalFormat("#.000");
+        try{
+            for(Integer keyTrain: trains.keySet()){
+                train = trains.get(keyTrain);
+                trainInstances = new Instances(new BufferedReader(new FileReader(train)));
+                trainInstances.setClassIndex(trainInstances.numAttributes() - 1);
+
+                System.out.println(train.getName());
+
+                Cluster cluster = clusters.get(keyTrain);
+
+                for(Integer keyTest: tests.keySet()){
+                    eval = new Evaluation(trainInstances);
+                    //classifier.buildClassifier(trainInstances);
+                    
+                    attsel = new AttributeSelectedClassifier();
+                    attsel.setClassifier(classifier);
+                    attsel.setEvaluator(evaluation);
+                    attsel.setSearch(search);
+                    attsel.buildClassifier(trainInstances);
+
+                    test = tests.get(keyTest);
+                    testInstances = new Instances(new BufferedReader(new FileReader(test)));
+                    testInstances.setClassIndex(testInstances.numAttributes() - 1);
+
+                    eval.evaluateModel(attsel, testInstances);
+
+                    result.write(classifierOption + ";" + attributeEvaluatorOptions + ";" + searchEvaluatorOptions + ";Cluster" + keyTrain + ";" + test.getName().replaceAll(" ","") + ";" + keyTrain + ";" + df.format(cluster.getCentroid()) + ";" + df.format(eval.weightedAreaUnderROC()) + ";" + df.format(eval.weightedPrecision()) + ";" + df.format(eval.weightedRecall()) + ";" + df.format(eval.weightedFMeasure()) + "\n");
+                }
+            }
+        }catch(Exception e){
+                System.out.println("Erro ao executar CROSS VALIDATION");
+        }
+    }
+    
     public void run(HashMap<Integer,Cluster> clusters, AlgorithmsOptions ao, AttributeEvaluatorOptions aeo, SearchMethodOptions smo, File directory, File directoryTests, File directoryTrains, File result, File relation) throws IOException, FileNotFoundException, Exception{
         int option;        
         Scanner read = new Scanner(System.in);
@@ -242,40 +287,139 @@ public class crossValidation {
         fwRelation.write("Code;File\n");
         writeRelation(filesSelectedForTraining, fwRelation);
         
-        String attributeEvaluatorOptions = null;
-        String searchEvaluatorOptions = null;
+        //String attributeEvaluatorOptions = null;
+        //String searchEvaluatorOptions = null;
         
-        if(aeo == AttributeEvaluatorOptions.CFS)
-            attributeEvaluatorOptions = "CFS";
-        else if(aeo == AttributeEvaluatorOptions.InfoGain)
-            attributeEvaluatorOptions = "InfoGain";
-        
-        if(smo == SearchMethodOptions.BestFirst)
-            searchEvaluatorOptions = "BestFirst";
-        else if(smo == SearchMethodOptions.GeneticSearch)
-            searchEvaluatorOptions = "GeneticSearch";
-        else if(smo == SearchMethodOptions.GreedyStepwise)
-            searchEvaluatorOptions = "GreedyStepwise";
-        else if(smo == SearchMethodOptions.Ranker)
-            searchEvaluatorOptions = "Ranker";
-        
-        String classifierOption;
-        if(ao == AlgorithmsOptions.J48){
-            classifierOption = "J48";
-            runCrossValidation(clusters,tests, trains, this.classifierJ48, classifierOption, attributeEvaluatorOptions, searchEvaluatorOptions, fw, fwRelation, rocFilesTests);
-        }else if(ao == AlgorithmsOptions.DecisionTable){
-            classifierOption = "DecisionTable";
-            runCrossValidation(clusters,tests, trains, this.classifierDecisionTable, classifierOption, attributeEvaluatorOptions, searchEvaluatorOptions, fw, fwRelation, rocFilesTests);
-        }else if(ao == AlgorithmsOptions.NaiveBayes){
-            classifierOption = "NaiveBayes";
-            runCrossValidation(clusters,tests, trains, this.classifierNaiveBayes, classifierOption, attributeEvaluatorOptions, searchEvaluatorOptions, fw, fwRelation, rocFilesTests);
-        }else if(ao == AlgorithmsOptions.RandomForest){
-            classifierOption = "RandomForest";
-            runCrossValidation(clusters,tests, trains, this.classifierRandomForest, classifierOption, attributeEvaluatorOptions, searchEvaluatorOptions, fw, fwRelation, rocFilesTests);
-        }else if(ao == AlgorithmsOptions.SimpleLogistic){
-            classifierOption = "SimpleLogistic";
-            runCrossValidation(clusters,tests, trains, this.classifierSimpleLogistic, classifierOption, attributeEvaluatorOptions, searchEvaluatorOptions, fw, fwRelation, rocFilesTests);
+        System.out.println("Deseja executar CROSS-PROJECT PREDICTION com FEATURE SELECTION? 0 - Não 1 - Sim");
+        if(read.nextInt() == 0){
+            /*if(aeo == AttributeEvaluatorOptions.CFS)
+                attributeEvaluatorOptions = "CFS";
+            else if(aeo == AttributeEvaluatorOptions.InfoGain)
+                attributeEvaluatorOptions = "InfoGain";
+
+            if(smo == SearchMethodOptions.BestFirst)
+                searchEvaluatorOptions = "BestFirst";
+            else if(smo == SearchMethodOptions.GeneticSearch)
+                searchEvaluatorOptions = "GeneticSearch";
+            else if(smo == SearchMethodOptions.GreedyStepwise)
+                searchEvaluatorOptions = "GreedyStepwise";
+            else if(smo == SearchMethodOptions.Ranker)
+                searchEvaluatorOptions = "Ranker";*/
+
+            String classifierOption;
+            if(ao == AlgorithmsOptions.J48){
+                classifierOption = "J48";
+                runCrossValidation(clusters,tests, trains, this.classifierJ48, classifierOption, "N/D", "N/D", fw, fwRelation, rocFilesTests);
+            }else if(ao == AlgorithmsOptions.DecisionTable){
+                classifierOption = "DecisionTable";
+                runCrossValidation(clusters,tests, trains, this.classifierDecisionTable, classifierOption, "N/D", "N/D", fw, fwRelation, rocFilesTests);
+            }else if(ao == AlgorithmsOptions.NaiveBayes){
+                classifierOption = "NaiveBayes";
+                runCrossValidation(clusters,tests, trains, this.classifierNaiveBayes, classifierOption, "N/D", "N/D", fw, fwRelation, rocFilesTests);
+            }else if(ao == AlgorithmsOptions.RandomForest){
+                classifierOption = "RandomForest";
+                runCrossValidation(clusters,tests, trains, this.classifierRandomForest, classifierOption, "N/D", "N/D", fw, fwRelation, rocFilesTests);
+            }else if(ao == AlgorithmsOptions.SimpleLogistic){
+                classifierOption = "SimpleLogistic";
+                runCrossValidation(clusters,tests, trains, this.classifierSimpleLogistic, classifierOption, "N/D", "N/D", fw, fwRelation, rocFilesTests);
+            }
+        }else{
+            if(ao == AlgorithmsOptions.J48){
+                if(aeo == AttributeEvaluatorOptions.CFS){
+                    if(smo == SearchMethodOptions.BestFirst){
+                        runCrossValidation(clusters,tests, trains, this.classifierJ48, this.evalCfs, this.searchBestFirst, "J48", "CFS", "BestFirst", fw, fwRelation, rocFilesTests);
+                    }
+                    else if(smo == SearchMethodOptions.GeneticSearch){
+                        runCrossValidation(clusters,tests, trains, this.classifierJ48, this.evalCfs, this.searchGeneticSearch, "J48", "CFS", "GeneticSearch", fw, fwRelation, rocFilesTests);
+                    }
+                    else if(smo == SearchMethodOptions.GreedyStepwise){
+                        runCrossValidation(clusters,tests, trains, this.classifierJ48, this.evalCfs, this.searchGreedyStepwise, "J48", "CFS", "GreedyStepwise", fw, fwRelation, rocFilesTests);
+                    }
+                }
+                else if(aeo == AttributeEvaluatorOptions.InfoGain){
+                    if(smo == SearchMethodOptions.Ranker){
+                        runCrossValidation(clusters,tests, trains, this.classifierJ48, this.evalInfoGain, this.searchRanker, "J48", "InfoGain", "Ranker", fw, fwRelation, rocFilesTests);
+                    }
+                }
+            }
+            
+            else if(ao == AlgorithmsOptions.DecisionTable){
+                if(aeo == AttributeEvaluatorOptions.CFS){
+                    if(smo == SearchMethodOptions.BestFirst){
+                        runCrossValidation(clusters,tests, trains, this.classifierDecisionTable, this.evalCfs, this.searchBestFirst, "DecisionTable", "CFS", "BestFirst", fw, fwRelation, rocFilesTests);
+                    }
+                    else if(smo == SearchMethodOptions.GeneticSearch){
+                        runCrossValidation(clusters,tests, trains, this.classifierDecisionTable, this.evalCfs, this.searchGeneticSearch, "DecisionTable", "CFS", "GeneticSearch", fw, fwRelation, rocFilesTests);
+                    }
+                    else if(smo == SearchMethodOptions.GreedyStepwise){
+                        runCrossValidation(clusters,tests, trains, this.classifierDecisionTable, this.evalCfs, this.searchGreedyStepwise, "DecisionTable", "CFS", "GreedyStepwise", fw, fwRelation, rocFilesTests);
+                    }
+                }
+                else if(aeo == AttributeEvaluatorOptions.InfoGain){
+                    if(smo == SearchMethodOptions.Ranker){
+                        runCrossValidation(clusters,tests, trains, this.classifierDecisionTable, this.evalInfoGain, this.searchRanker, "DecisionTable", "InfoGain", "Ranker", fw, fwRelation, rocFilesTests);
+                    }
+                }
+            }
+            
+            else if(ao == AlgorithmsOptions.NaiveBayes){
+                if(aeo == AttributeEvaluatorOptions.CFS){
+                    if(smo == SearchMethodOptions.BestFirst){
+                        runCrossValidation(clusters,tests, trains, this.classifierNaiveBayes, this.evalCfs, this.searchBestFirst, "NaiveBayes", "CFS", "BestFirst", fw, fwRelation, rocFilesTests);
+                    }
+                    else if(smo == SearchMethodOptions.GeneticSearch){
+                        runCrossValidation(clusters,tests, trains, this.classifierNaiveBayes, this.evalCfs, this.searchGeneticSearch, "NaiveBayes", "CFS", "GeneticSearch", fw, fwRelation, rocFilesTests);
+                    }
+                    else if(smo == SearchMethodOptions.GreedyStepwise){
+                        runCrossValidation(clusters,tests, trains, this.classifierNaiveBayes, this.evalCfs, this.searchGreedyStepwise, "NaiveBayes", "CFS", "GreedyStepwise", fw, fwRelation, rocFilesTests);
+                    }
+                }
+                else if(aeo == AttributeEvaluatorOptions.InfoGain){
+                    if(smo == SearchMethodOptions.Ranker){
+                        runCrossValidation(clusters,tests, trains, this.classifierNaiveBayes, this.evalInfoGain, this.searchRanker, "NaiveBayes", "InfoGain", "Ranker", fw, fwRelation, rocFilesTests);
+                    }
+                }
+            }
+            
+            else if(ao == AlgorithmsOptions.RandomForest){
+                if(aeo == AttributeEvaluatorOptions.CFS){
+                    if(smo == SearchMethodOptions.BestFirst){
+                        runCrossValidation(clusters,tests, trains, this.classifierRandomForest, this.evalCfs, this.searchBestFirst, "RandomForest", "CFS", "BestFirst", fw, fwRelation, rocFilesTests);
+                    }
+                    else if(smo == SearchMethodOptions.GeneticSearch){
+                        runCrossValidation(clusters,tests, trains, this.classifierRandomForest, this.evalCfs, this.searchGeneticSearch, "RandomForest", "CFS", "GeneticSearch", fw, fwRelation, rocFilesTests);
+                    }
+                    else if(smo == SearchMethodOptions.GreedyStepwise){
+                        runCrossValidation(clusters,tests, trains, this.classifierRandomForest, this.evalCfs, this.searchGreedyStepwise, "RandomForest", "CFS", "GreedyStepwise", fw, fwRelation, rocFilesTests);
+                    }
+                }
+                else if(aeo == AttributeEvaluatorOptions.InfoGain){
+                    if(smo == SearchMethodOptions.Ranker){
+                        runCrossValidation(clusters,tests, trains, this.classifierRandomForest, this.evalInfoGain, this.searchRanker, "RandomForest", "InfoGain", "Ranker", fw, fwRelation, rocFilesTests);
+                    }
+                }
+            }
+            
+            else if(ao == AlgorithmsOptions.SimpleLogistic){
+                if(aeo == AttributeEvaluatorOptions.CFS){
+                    if(smo == SearchMethodOptions.BestFirst){
+                        runCrossValidation(clusters,tests, trains, this.classifierSimpleLogistic, this.evalCfs, this.searchBestFirst, "SimpleLogistic", "CFS", "BestFirst", fw, fwRelation, rocFilesTests);
+                    }
+                    else if(smo == SearchMethodOptions.GeneticSearch){
+                        runCrossValidation(clusters,tests, trains, this.classifierSimpleLogistic, this.evalCfs, this.searchGeneticSearch, "SimpleLogistic", "CFS", "GeneticSearch", fw, fwRelation, rocFilesTests);
+                    }
+                    else if(smo == SearchMethodOptions.GreedyStepwise){
+                        runCrossValidation(clusters,tests, trains, this.classifierSimpleLogistic, this.evalCfs, this.searchGreedyStepwise, "SimpleLogistic", "CFS", "GreedyStepwise", fw, fwRelation, rocFilesTests);
+                    }
+                }
+                else if(aeo == AttributeEvaluatorOptions.InfoGain){
+                    if(smo == SearchMethodOptions.Ranker){
+                        runCrossValidation(clusters,tests, trains, this.classifierSimpleLogistic, this.evalInfoGain, this.searchRanker, "SimpleLogistic", "InfoGain", "Ranker", fw, fwRelation, rocFilesTests);
+                    }
+                }
+            }
         }
+        
         
         fw.flush();
         fwRelation.flush();

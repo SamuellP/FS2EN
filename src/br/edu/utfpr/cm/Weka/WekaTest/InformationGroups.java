@@ -31,13 +31,13 @@ public class InformationGroups {
         try{
             fwOutput = new FileWriter(output);
             
-            this.generateGroupOne(fwOutput, clusteriza.getClusters());
+            this.generateGroupOne(fwOutput, clusteriza.getSubClusters());
             fwOutput.write("\n\n");
-            this.generateGroupTwo(clusteriza.getClusters(), fwOutput, clusteriza.getAlgorithmsOptions(), clusteriza.getAttributeEvaluatorOptions(), clusteriza.getSearchMethodOptions());
+            this.generateGroupTwo(clusteriza.getSubClusters(), fwOutput, clusteriza.getAlgorithmsOptions(), clusteriza.getAttributeEvaluatorOptions(), clusteriza.getSearchMethodOptions());
             fwOutput.write("\n\n");
-            this.generateGroupThreeFourAndFive(clusteriza.getClusters(), clusteriza.getAmountOfDatasetsClustered(), fwOutput, clusteriza.getAttributeEvaluatorOptions(), clusteriza.getSearchMethodOptions());
+            this.generateGroupThreeFourAndFive(clusteriza.getSubClusters(), clusteriza.getAmountOfDatasetsClustered(), fwOutput, clusteriza.getAttributeEvaluatorOptions(), clusteriza.getSearchMethodOptions());
             fwOutput.write("\n\n");
-            this.generateGroupSixSevenAndEight(clusteriza.getClusters(), clusteriza.getAmountOfDatasetsClustered(), fwOutput, AttributeEvaluatorOptions.InfoGain, SearchMethodOptions.Ranker);
+            this.generateGroupSixSevenAndEight(clusteriza.getSubClusters(), clusteriza.getAmountOfDatasetsClustered(), fwOutput, AttributeEvaluatorOptions.InfoGain, SearchMethodOptions.Ranker);
             
             fwOutput.flush();
         }catch(Exception e){
@@ -45,7 +45,7 @@ public class InformationGroups {
         }
     }
     
-    public void generateGroupOne(Writer output, Map<Integer,Cluster> clusters){
+    public void generateGroupOne(Writer output, Map<Double,Cluster> clusters){
         DecimalFormat df = new DecimalFormat("#.000");
         
         try{
@@ -53,7 +53,7 @@ public class InformationGroups {
             output.write("Obs:_Contem_informacoes_do_Cluster_original\n\n");
             output.write("N_Cluster;Centroide;Dataset;Algoritmo;AttributeEvaluator;SearchMethod;ROC\n");
             
-            for(Integer key: clusters.keySet()){
+            for(Double key: clusters.keySet()){
                 Cluster cluster = clusters.get(key);
                 
                 for(Element element: cluster.getVectors()){
@@ -68,7 +68,7 @@ public class InformationGroups {
         }
     }
     
-    public void generateGroupTwo(Map<Integer,Cluster> clusters, Writer output, AlgorithmsOptions aoOption, AttributeEvaluatorOptions aeOption, SearchMethodOptions smOption){
+    public void generateGroupTwo(Map<Double,Cluster> clusters, Writer output, AlgorithmsOptions aoOption, AttributeEvaluatorOptions aeOption, SearchMethodOptions smOption){
         String[] datasetsOfCluster = null;
         Double[] roc = null;
         int i = 0;
@@ -81,17 +81,18 @@ public class InformationGroups {
             output.write("Obs:_Resultados_executando_com_as_mesmas_entradas_iniciais_porem_considerando_apenas_as_features_selecionadas_na_classificacao_inicial\n\n");
             output.write("N_Cluster;Centroide;Dataset;ROC;Distancia_para_o_cluster_inicial\n");
             
-            for(Integer key: clusters.keySet()){
+            for(Double key: clusters.keySet()){
                 Cluster cluster = clusters.get(key);
                 
                 datasetsOfCluster = new String[cluster.getQtdVectors()];
                 roc = new Double[cluster.getQtdVectors()];
                 
+                ArrayList<String> features = cluster.getCommonFeatures();
+                
                 for(Element element: cluster.getVectors()){
                     Instances instances = new Instances(new BufferedReader(new FileReader(element.getPath())));
-                                        
-                    ArrayList<String> features = element.getFeatures();// Features selecionadas na classificação
                     
+                    System.out.println(key + " - " + features);
                     Enumeration attributes = instances.enumerateAttributes();
                     
                     while(attributes.hasMoreElements()){
@@ -127,10 +128,10 @@ public class InformationGroups {
         }
     }
     
-    public void generateGroupThreeFourAndFive(Map<Integer,Cluster> clusters, int amountDataset, Writer output, AttributeEvaluatorOptions aeOption, SearchMethodOptions smOption){
-        Map<Integer,Double> centroidRandomForestCluster;
-        Map<Integer,Double> centroidSimpleLogisticCluster;
-        Map<Integer,Double> centroidNaiveBayesCluster;
+    public void generateGroupThreeFourAndFive(Map<Double,Cluster> clusters, int amountDataset, Writer output, AttributeEvaluatorOptions aeOption, SearchMethodOptions smOption){
+        Map<Double,Double> centroidRandomForestCluster;
+        Map<Double,Double> centroidSimpleLogisticCluster;
+        Map<Double,Double> centroidNaiveBayesCluster;
         ArrayList<String> selectedFeatures;
         // Estão interligados por posição
         String[] datasetsOfCluster = null;
@@ -146,10 +147,10 @@ public class InformationGroups {
         DecimalFormat df = new DecimalFormat("#.000");
         
         try{
-            centroidNaiveBayesCluster = new HashMap<Integer,Double>();
-            centroidRandomForestCluster = new HashMap<Integer, Double>();
-            centroidSimpleLogisticCluster = new HashMap<Integer, Double>();
-            selectedFeatures = new ArrayList<String>();
+            centroidNaiveBayesCluster = new HashMap<Double,Double>();
+            centroidRandomForestCluster = new HashMap<Double, Double>();
+            centroidSimpleLogisticCluster = new HashMap<Double, Double>();
+            //selectedFeatures = new ArrayList<String>();
             i = 0;
             centroideNaiveBayes = 0;
             centroideRandomForest = 0;
@@ -160,9 +161,9 @@ public class InformationGroups {
             rocSimpleLogistic = new Double[amountDataset];
             datasetsOfCluster = new String[amountDataset];
             
-            for(Integer key: clusters.keySet()){
+            for(Double key: clusters.keySet()){
                 Cluster cluster = clusters.get(key);
-                
+                /*
                 // Fazendo intersecção das features entre todos os elementos do cluster
                 if(cluster.getQtdVectors() > 1){
                     Element e1 = cluster.getVectors().get(0);
@@ -181,7 +182,8 @@ public class InformationGroups {
                             canKeepThisFeature = true;
                     }
                 }
-                //
+                //*/
+                selectedFeatures = cluster.getCommonFeatures();
                 
                 for(Element element: cluster.getVectors()){
                     Instances instances = new Instances(new BufferedReader(new FileReader(element.getPath())));
@@ -249,7 +251,7 @@ public class InformationGroups {
                     
                     i++;
                 }
-                selectedFeatures.clear();
+                //selectedFeatures.clear();
                 
                 centroideNaiveBayes = centroideNaiveBayes / cluster.getQtdVectors();
                 centroideRandomForest = centroideRandomForest / cluster.getQtdVectors();
@@ -272,7 +274,7 @@ public class InformationGroups {
             output.write("Grupo_de_informacao_3\n");
             output.write("Obs:_Resultados_obtidos_rodando_RandomForest\n\n");
             output.write("N_Cluster;Centroide;Dataset;ROC;Distancia_para_o_cluster_inicial\n");
-            for(Integer key: clusters.keySet()){
+            for(Double key: clusters.keySet()){
                 for(int j = 0; j < clusters.get(key).getQtdVectors(); j++){
                     double centroid = centroidRandomForestCluster.get(key);
                     output.write(key + ";" + df.format(centroid) + ";" +
@@ -287,7 +289,7 @@ public class InformationGroups {
             output.write("\n\nGrupo_de_informacao_4\n");
             output.write("Obs:_Resultados_obtidos_rodando_SimpleLogistic\n\n");
             output.write("N_Cluster;Centroide;Dataset;ROC;Distancia_para_o_cluster_inicial\n");
-            for(Integer key: clusters.keySet()){
+            for(Double key: clusters.keySet()){
                 for(int j = 0; j < clusters.get(key).getQtdVectors(); j++){
                     double centroid = centroidSimpleLogisticCluster.get(key).doubleValue();
                     output.write(key + ";" + df.format(centroid) + ";" +
@@ -302,7 +304,7 @@ public class InformationGroups {
             output.write("\n\nGrupo_de_informacao_5\n");
             output.write("Obs:_Resultados_obtidos_rodando_NaiveBayes\n\n");
             output.write("N_Cluster;Centroide;Dataset;ROC;Distancia_para_o_cluster_inicial\n");
-            for(Integer key: clusters.keySet()){
+            for(Double key: clusters.keySet()){
                 for(int j = 0; j < clusters.get(key).getQtdVectors(); j++){
                     double centroid = centroidNaiveBayesCluster.get(key).doubleValue();
                     output.write(key + ";" + df.format(centroid) + ";" +
@@ -320,10 +322,10 @@ public class InformationGroups {
         }
     }
     
-    public void generateGroupSixSevenAndEight(Map<Integer,Cluster> clusters, int amountDataset, Writer output, AttributeEvaluatorOptions aeOption, SearchMethodOptions smOption){
-        Map<Integer,Double> centroidRandomForestCluster;
-        Map<Integer,Double> centroidSimpleLogisticCluster;
-        Map<Integer,Double> centroidNaiveBayesCluster;
+    public void generateGroupSixSevenAndEight(Map<Double,Cluster> clusters, int amountDataset, Writer output, AttributeEvaluatorOptions aeOption, SearchMethodOptions smOption){
+        Map<Double,Double> centroidRandomForestCluster;
+        Map<Double,Double> centroidSimpleLogisticCluster;
+        Map<Double,Double> centroidNaiveBayesCluster;
         ArrayList<String> selectedFeatures;
         // Estão interligados por posição
         String[] datasetsOfCluster = null;
@@ -339,10 +341,10 @@ public class InformationGroups {
         DecimalFormat df = new DecimalFormat("#.000");
         
         try{
-            centroidNaiveBayesCluster = new HashMap<Integer,Double>();
-            centroidRandomForestCluster = new HashMap<Integer, Double>();
-            centroidSimpleLogisticCluster = new HashMap<Integer, Double>();
-            selectedFeatures = new ArrayList<String>();
+            centroidNaiveBayesCluster = new HashMap<Double,Double>();
+            centroidRandomForestCluster = new HashMap<Double, Double>();
+            centroidSimpleLogisticCluster = new HashMap<Double, Double>();
+            //selectedFeatures = new ArrayList<String>();
             i = 0;
             centroideNaiveBayes = 0;
             centroideRandomForest = 0;
@@ -353,9 +355,9 @@ public class InformationGroups {
             rocSimpleLogistic = new Double[amountDataset];
             datasetsOfCluster = new String[amountDataset];
             
-            for(Integer key: clusters.keySet()){
+            for(Double key: clusters.keySet()){
                 Cluster cluster = clusters.get(key);
-                
+                /*
                 // Fazendo intersecção das features entre todos os elementos do cluster
                 if(cluster.getQtdVectors() > 1){
                     Element e1 = cluster.getVectors().get(0);
@@ -384,7 +386,8 @@ public class InformationGroups {
                             canKeepThisFeature = true;
                     }
                 }
-                //
+                //*/
+                selectedFeatures = cluster.getCommonFeatures();
                 
                 for(Element element: cluster.getVectors()){
                     Instances instances = new Instances(new BufferedReader(new FileReader(element.getPath())));
@@ -437,7 +440,7 @@ public class InformationGroups {
                     
                     i++;
                 }
-                selectedFeatures.clear();
+                //selectedFeatures.clear();
                 
                 centroideNaiveBayes = centroideNaiveBayes / cluster.getQtdVectors();
                 centroideRandomForest = centroideRandomForest / cluster.getQtdVectors();
@@ -460,7 +463,7 @@ public class InformationGroups {
             output.write("Grupo_de_informacao_6\n");
             output.write("Obs:_Resultados_obtidos_rodando_RandomForest\n\n");
             output.write("N_Cluster;Centroide;Dataset;ROC;Distancia_para_o_cluster_inicial\n");
-            for(Integer key: clusters.keySet()){
+            for(Double key: clusters.keySet()){
                 for(int j = 0; j < clusters.get(key).getQtdVectors(); j++){
                     double centroid = centroidRandomForestCluster.get(key);
                     output.write(key + ";" + df.format(centroid) + ";" +
@@ -475,7 +478,7 @@ public class InformationGroups {
             output.write("\n\nGrupo_de_informacao_7\n");
             output.write("Obs:_Resultados_obtidos_rodando_SimpleLogistic\n\n");
             output.write("N_Cluster;Centroide;Dataset;ROC;Distancia_para_o_cluster_inicial\n");
-            for(Integer key: clusters.keySet()){
+            for(Double key: clusters.keySet()){
                 for(int j = 0; j < clusters.get(key).getQtdVectors(); j++){
                     double centroid = centroidSimpleLogisticCluster.get(key).doubleValue();
                     output.write(key + ";" + df.format(centroid) + ";" +
@@ -490,7 +493,7 @@ public class InformationGroups {
             output.write("\n\nGrupo_de_informacao_8\n");
             output.write("Obs:_Resultados_obtidos_rodando_NaiveBayes\n\n");
             output.write("N_Cluster;Centroide;Dataset;ROC;Distancia_para_o_cluster_inicial\n");
-            for(Integer key: clusters.keySet()){
+            for(Double key: clusters.keySet()){
                 for(int j = 0; j < clusters.get(key).getQtdVectors(); j++){
                     double centroid = centroidNaiveBayesCluster.get(key).doubleValue();
                     output.write(key + ";" + df.format(centroid) + ";" +

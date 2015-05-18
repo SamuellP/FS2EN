@@ -11,6 +11,7 @@ import java.util.ArrayList;
  * @author samuel
  */
 public final class Cluster {
+    private ArrayList<String> commonFeatures;
     private ArrayList<Element> vectors;
     private double cohesion;
     private double centroid;
@@ -19,6 +20,7 @@ public final class Cluster {
     private int qtdVectors;
     
     Cluster(){
+        this.commonFeatures = new ArrayList<String>();
         this.vectors = new ArrayList<Element>();
         setCohesion(Double.POSITIVE_INFINITY);
         setCentroid(Double.POSITIVE_INFINITY);
@@ -86,5 +88,13 @@ public final class Cluster {
         this.vectors.add(e);
         this.qtdVectors++;
         this.sumRoc += e.getRoc();
+    }
+
+    public ArrayList<String> getCommonFeatures() {
+        return commonFeatures;
+    }
+
+    public void setCommonFeatures(ArrayList<String> commonFeatures) {
+        this.commonFeatures = commonFeatures;
     }
 }

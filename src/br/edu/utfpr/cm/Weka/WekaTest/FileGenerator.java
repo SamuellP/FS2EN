@@ -90,6 +90,7 @@ public class FileGenerator {
         }
     }
     
+    /** Rodando com o CLASSIFICADOR mais FEATURE SELECTION **/
     public void writeRoc(File dataset, FileWriter rocFile, FileWriter fields, Classifier classifier, ASEvaluation eval, ASSearch search, String ao, String aeo, String smo) throws IOException{
         DecimalFormat df = new DecimalFormat("#.000");
         
@@ -136,6 +137,64 @@ public class FileGenerator {
                       rocFile.write(";" + df.format(evaluation.weightedFMeasure()));*/
                   
                   writeFields(fields,dataset.getName(),instances, eval, search, ao, aeo, smo); // gravando os campos
+                  
+                  System.out.println("instância processada: nome: " + dataset.getName()); // Satin: Gerando log em tela de quanto já foi executado do programa!
+            }else{
+                  System.out.println("Not computed: Less than 5 instances....");
+            }
+            
+        }catch(Exception e){
+            System.out.println("Tratando exceção para o arquivo: " + dataset.getName());
+        }
+    }
+    
+    /** Rodando somente com o CLASSIFICADOR, sem FEATURE SELECTION */
+    public void writeRoc(File dataset, FileWriter rocFile, Classifier classifier, String ao) throws IOException{
+        DecimalFormat df = new DecimalFormat("#.000");
+        
+        try{
+            
+            Instances instances = new Instances(new BufferedReader(new FileReader(dataset)));
+            instances.setClassIndex(instances.numAttributes() - 1);
+            
+            //attsel.setClassifier(classifier);
+            //attsel.setEvaluator(eval);
+            //attsel.setSearch(search);
+            
+            Evaluation evaluation = new Evaluation(instances);
+            evaluation.crossValidateModel(classifier,instances,10,new Random(1),this.forPredictionsPrinting ,this.attsToOutput, this.outputDistribution);
+            
+            if(instances.numInstances() >= 5){
+                  rocFile.write(dataset.getName() + ";" + dataset.getPath() + ";" + ao + ";" + "N/D" + 
+                                ";" + "N/D" + ";" + 
+                                df.format(evaluation.weightedAreaUnderROC()) + ";" +
+                                df.format(evaluation.weightedPrecision()) + ";" +
+                                df.format(evaluation.weightedRecall()) + ";" +
+                                df.format(evaluation.weightedFMeasure()) + "\n"
+                          );
+                  /*
+                  if(afc == AttributesForClustering.Roc)
+                      rocFile.write(";" + df.format(evaluation.weightedAreaUnderROC()));
+                  else if(afc == AttributesForClustering.Roc_And_F_Measure)
+                      rocFile.write(";" + df.format(evaluation.weightedAreaUnderROC()) + ";" + df.format(evaluation.weightedFMeasure()));
+                  else if(afc == AttributesForClustering.Roc_And_Precision)
+                      rocFile.write(";" + df.format(evaluation.weightedAreaUnderROC()) + ";" + df.format(evaluation.weightedPrecision()));
+                  else if(afc == AttributesForClustering.Roc_And_Recall)
+                      rocFile.write(";" + df.format(evaluation.weightedAreaUnderROC()) + ";" + df.format(evaluation.weightedRecall()));
+                  else if(afc == AttributesForClustering.Recall)
+                      rocFile.write(";" + df.format(evaluation.weightedRecall()));
+                  else if(afc == AttributesForClustering.Recall_And_F_Measure)
+                      rocFile.write(";" + df.format(evaluation.weightedRecall()) + ";" + df.format(evaluation.weightedFMeasure()));
+                  else if(afc == AttributesForClustering.Precision)
+                      rocFile.write(";" + df.format(evaluation.weightedPrecision()));
+                  else if(afc == AttributesForClustering.Precision_And_F_Measure)
+                      rocFile.write(";" + df.format(evaluation.weightedPrecision()) + ";" + df.format(evaluation.weightedFMeasure()));
+                  else if(afc == AttributesForClustering.Precision_And_Recall)
+                      rocFile.write(";" + df.format(evaluation.weightedPrecision()) + ";" + df.format(evaluation.weightedRecall()));
+                  else if(afc == AttributesForClustering.F_Measure)
+                      rocFile.write(";" + df.format(evaluation.weightedFMeasure()));*/
+                  
+                  //writeFields(fields,dataset.getName(),instances, eval, search, ao, aeo, smo); // gravando os campos
                   
                   System.out.println("instância processada: nome: " + dataset.getName()); // Satin: Gerando log em tela de quanto já foi executado do programa!
             }else{
@@ -265,5 +324,38 @@ public class FileGenerator {
         }
         fwRoc.flush();
         fwAttribute.flush();
-    } 
+    }
+    
+    public void generateRocFile(File[] datasets, File rocFile, AttributesForClustering afc) throws IOException{
+        FileWriter fwRoc = new FileWriter(rocFile);
+        
+        for(File file: datasets){
+            
+            if(this.algorithmOption == AlgorithmsOptions.DecisionTable){
+                writeRoc(file, fwRoc, this.classifierDecisionTable, "DecisionTable");
+            }
+            
+            else if(this.algorithmOption == AlgorithmsOptions.J48){
+                writeRoc(file, fwRoc, this.classifierJ48, "J48");
+            }
+            
+            else if(this.algorithmOption == AlgorithmsOptions.NaiveBayes){
+                writeRoc(file, fwRoc, this.classifierNaiveBayes, "NaiveBayes");
+            }
+            
+            else if(this.algorithmOption == AlgorithmsOptions.RandomForest){
+                writeRoc(file, fwRoc, this.classifierRandomForest, "RandomForest");
+            }
+            
+            else if(this.algorithmOption == AlgorithmsOptions.SimpleLogistic){
+                writeRoc(file, fwRoc, this.classifierSimpleLogistic, "SimpleLogistic");
+            }
+            
+            else {
+                System.out.println("Erro durante a geração do arquivo contendo o ROC");
+                return;
+            }
+        }
+        fwRoc.flush();
+    }
 }
