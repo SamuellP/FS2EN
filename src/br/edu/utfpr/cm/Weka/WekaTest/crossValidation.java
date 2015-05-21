@@ -218,7 +218,7 @@ public class crossValidation {
 
                     eval.evaluateModel(classifier, testInstances);
 
-                    result.write(classifierOption + ";" + attributeEvaluatorOptions + ";" + searchEvaluatorOptions + ";Cluster" + keyTrain + ";" + test.getName().replaceAll(" ","") + ";" + keyTrain + ";" + df.format(cluster.getCentroid()) + ";" + df.format(eval.weightedAreaUnderROC()) + ";" + df.format(eval.weightedPrecision()) + ";" + df.format(eval.weightedRecall()) + ";" + df.format(eval.weightedFMeasure()) + "\n");
+                    result.write(classifierOption + ";" + attributeEvaluatorOptions + ";" + searchEvaluatorOptions + ";Cluster" + keyTrain + ";" + test.getName().replaceAll(" ","") + ";" + keyTrain + ";" + (int)eval.numInstances() + ";" + (int)eval.correct() + ";" + (int)eval.incorrect() + ";" + (int)(eval.numTrueNegatives(1) + eval.numFalseNegatives(0)) + ";" + (int)(eval.numFalsePositives(0) + eval.numTruePositives(1)) + ";" + df.format(cluster.getCentroid()) + ";" + df.format(eval.weightedAreaUnderROC()) + ";" + df.format(eval.weightedPrecision()) + ";" + df.format(eval.weightedRecall()) + ";" + df.format(eval.weightedFMeasure()) + ";" + df.format(eval.weightedTruePositiveRate()) + ";" + df.format(eval.weightedFalsePositiveRate())+ ";" + eval.numTrueNegatives(1) + ";" + eval.numFalseNegatives(0) + ";" + eval.numFalsePositives(0) + ";" + eval.numTruePositives(1) + "\n");
                 }
             }
         }catch(Exception e){
@@ -261,7 +261,7 @@ public class crossValidation {
 
                     eval.evaluateModel(attsel, testInstances);
 
-                    result.write(classifierOption + ";" + attributeEvaluatorOptions + ";" + searchEvaluatorOptions + ";Cluster" + keyTrain + ";" + test.getName().replaceAll(" ","") + ";" + keyTrain + ";" + df.format(cluster.getCentroid()) + ";" + df.format(eval.weightedAreaUnderROC()) + ";" + df.format(eval.weightedPrecision()) + ";" + df.format(eval.weightedRecall()) + ";" + df.format(eval.weightedFMeasure()) + "\n");
+                    result.write(classifierOption + ";" + attributeEvaluatorOptions + ";" + searchEvaluatorOptions + ";Cluster" + keyTrain + ";" + test.getName().replaceAll(" ","") + ";" + keyTrain + ";" + (int)eval.numInstances() + ";" + (int)eval.correct() + ";" + (int)eval.incorrect() + ";" + (int)(eval.numTrueNegatives(1) + eval.numFalseNegatives(0)) + ";" + (int)(eval.numFalsePositives(0) + eval.numTruePositives(1)) + ";" + df.format(cluster.getCentroid()) + ";" + df.format(eval.weightedAreaUnderROC()) + ";" + df.format(eval.weightedPrecision()) + ";" + df.format(eval.weightedRecall()) + ";" + df.format(eval.weightedFMeasure()) + ";" + df.format(eval.weightedTruePositiveRate()) + ";" + df.format(eval.weightedFalsePositiveRate())+ ";" + eval.numTrueNegatives(1) + ";" + eval.numFalseNegatives(0) + ";" + eval.numFalsePositives(0) + ";" + eval.numTruePositives(1) + "\n");
                 }
             }
         }catch(Exception e){
@@ -283,7 +283,7 @@ public class crossValidation {
         HashMap<Integer,File> tests = getAllTests(clusters, directory.toString(), directoryTests.toString(), rocFilesTests, option);
         HashMap<Integer,File> trains = getAllTrains(clusters, directory.toString(), directoryTrains.toString(),filesSelectedForTraining, option);
         
-        fw.write("Algoritmo;Attribute;SearchMethod;Cluster;FileTest;FilesTrain;RocCluster;RocTeste;PrecisionTeste;RecallTeste;F-MeasureTeste\n");
+        fw.write("Algoritmo;Attribute;SearchMethod;Cluster;FileTest;FilesTrain;TotalInstancias;InstanciasCorretas;InstanciasIncorretas;NrInstanciasBuggy;NrInstanciasClean;RocCluster;RocTeste;PrecisionTeste;RecallTeste;F-MeasureTeste;TP-RateTeste;FP-RateTeste;TP;FP;FN;TN\n");
         fwRelation.write("Code;File\n");
         writeRelation(filesSelectedForTraining, fwRelation);
         

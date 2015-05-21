@@ -104,17 +104,25 @@ public class ResultTable {
                 line += evaluation.numInstances() + ";" + 
                   evaluation.correct() + ";" + df.format(evaluation.pctCorrect()) + ";" + 
                   evaluation.incorrect() + ";" + df.format(evaluation.pctIncorrect()) + ";" + 
+                  (int)(evaluation.numTrueNegatives(1) + evaluation.numFalseNegatives(0)) + ";" +
+                  (int)(evaluation.numFalsePositives(0) + evaluation.numTruePositives(1)) + ";" +
                   df.format(evaluation.truePositiveRate(0)) + ";" + 
                   df.format(evaluation.truePositiveRate(1)) + ";" + 
+                  df.format(evaluation.weightedTruePositiveRate()) + ";" +
                   df.format(evaluation.falsePositiveRate(0)) + ";" +  
-                  df.format(evaluation.falsePositiveRate(1)) + ";" +  
-                  df.format(evaluation.precision(0)) + ";" +  df.format(evaluation.precision(1)) + ";" +  
+                  df.format(evaluation.falsePositiveRate(1)) + ";" + 
+                  df.format(evaluation.weightedFalsePositiveRate()) + ";" +
+                  df.format(evaluation.precision(0)) + ";" +  df.format(evaluation.precision(1)) + ";" + 
+                  df.format(evaluation.weightedPrecision()) + ";" +
                   df.format(evaluation.recall(0)) + ";" +  df.format(evaluation.recall(1)) + ";" +  
+                  df.format(evaluation.weightedRecall()) + ";" +
                   df.format(evaluation.fMeasure(0)) + ";" +  df.format(evaluation.fMeasure(1)) + ";" + 
-                  df.format(evaluation.areaUnderROC(0)) + ";" + 
-                  df.format(evaluation.areaUnderROC(1)) + ";" + evaluation.numTrueNegatives(1) + 
-                  ';' + evaluation.numFalsePositives(0) + ";" + evaluation.numFalseNegatives(0) + 
-                  ';' + evaluation.numTruePositives(1) + ";" + "S\n";
+                  df.format(evaluation.weightedFMeasure()) + ";" +
+                  df.format(evaluation.areaUnderROC(0)) + ";" + df.format(evaluation.areaUnderROC(1)) + ";" +
+                  df.format(evaluation.weightedAreaUnderROC()) + ";" +
+                  evaluation.numTrueNegatives(1) + ";" +
+                  evaluation.numFalseNegatives(0) + ';' + evaluation.numFalsePositives(0) + ";" +  
+                  evaluation.numTruePositives(1) + ";" + "S\n";
                 
                 table.write(line);  
 
@@ -136,7 +144,7 @@ public class ResultTable {
     public void createResultTable(File[] datasets, File output, File fields) throws IOException, Exception{
             FileWriter fw = new FileWriter(output);
             FileWriter fd = new FileWriter(fields);
-            fw.write("Codigo;Dataset;Algoritmo;AttributeEvaluator;SearchMethod;TotalInstancias;InstanciasCorretas;%Corret.;InstanciasIncorretas;%Incorret.;TP-RateBuggy;TP-RateClean;FP-RateBuggy;FP-RateClean;PrecisionBuggy;PrecisionClean;RecallBuggy;RecallClean;F-MeasureBuggy;F-MeasureClean;ROCBuggy;ROCClean;a;a;b;b;Atributos\n");
+            fw.write("Codigo;Dataset;Algoritmo;AttributeEvaluator;SearchMethod;TotalInstancias;InstanciasCorretas;%Corret.;InstanciasIncorretas;%Incorret.;NrInstanciasBuggy;NrInstanciasClean;TP-RateBuggy;TP-RateClean;TP-RateModelo;FP-RateBuggy;FP-RateClean;FP-RateModelo;PrecisionBuggy;PrecisionClean;PrecisionModelo;RecallBuggy;RecallClean;RecallModelo;F-MeasureBuggy;F-MeasureClean;F-MeasureModelo;ROCBuggy;ROCClean;ROCModelo;TP;FP;FN;TN;Atributos\n");
             fd.write("Codigo;Dataset;Algoritmo;AttributeEvaluator;SearchMethod;IndexField;Feature;Ranking\n");
             for(File f: datasets){
                 if(option == AlgorithmsOptions.NaiveBayes || option == AlgorithmsOptions.All){
@@ -207,7 +215,7 @@ public class ResultTable {
         /** Diretório contendo os arquivos arff **/
         
         //Samuel 
-        File directory = new File("/home/samuel/Documentos/BCC/Projeto/arquivos_teste/saida/ARFF");
+        File directory = new File("/home/samuel/Documentos/BCC/Projeto/arquivos_teste/saida/arffTeste");
         
         //Ricardo
         //File directory = new File("C:/ACER_D/ricardo/Mestrado/Mestrado/Arquivos/tmp");
