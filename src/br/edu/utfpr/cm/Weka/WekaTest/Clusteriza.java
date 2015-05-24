@@ -113,7 +113,8 @@ public final class Clusteriza {
             brFeatures = new BufferedReader(new FileReader(this.features));
             hash = loadFeatures(aoOptions, aeOptions, smOptions);
         }
-
+        
+        br.readLine(); // Consumindo o cabeçalho
         while (br.ready()) {
             line = br.readLine();
             Scanner scanner = new Scanner(line);

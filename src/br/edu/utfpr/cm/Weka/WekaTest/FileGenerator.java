@@ -107,12 +107,32 @@ public class FileGenerator {
             evaluation.crossValidateModel(attsel,instances,10,new Random(1),this.forPredictionsPrinting ,this.attsToOutput, this.outputDistribution);
             
             if(instances.numInstances() >= 5){
-                  rocFile.write(dataset.getName() + ";" + dataset.getPath() + ";" + ao + ";" + aeo + 
+                  /*rocFile.write(dataset.getName() + ";" + dataset.getPath() + ";" + ao + ";" + aeo + 
                                 ";" + smo + ";" + 
                                 df.format(evaluation.weightedAreaUnderROC()) + ";" +
                                 df.format(evaluation.weightedPrecision()) + ";" +
                                 df.format(evaluation.weightedRecall()) + ";" +
                                 df.format(evaluation.weightedFMeasure()) + "\n"
+                          );*/
+                  
+                  rocFile.write(dataset.getName() + ";" + dataset.getPath() + ";" + ao + ";" + aeo + 
+                                ";" + smo + ";" + 
+                                df.format(evaluation.weightedAreaUnderROC()) + ";" +
+                                df.format(evaluation.weightedPrecision()) + ";" +
+                                df.format(evaluation.weightedRecall()) + ";" +
+                                df.format(evaluation.weightedFMeasure()) + ";" +
+                                df.format(evaluation.weightedTruePositiveRate()) + ";" +
+                                df.format(evaluation.weightedFalsePositiveRate()) + ";" +
+                                (int)evaluation.numInstances() + ";" +
+                                (int)evaluation.correct() + ";" +
+                                df.format(evaluation.pctCorrect()) + ";" +
+                                (int)evaluation.incorrect() + ";" +
+                                df.format(evaluation.pctIncorrect()) + ";" +
+                                (int)(evaluation.numTrueNegatives(1) + evaluation.numFalseNegatives(0)) + ";" +
+                                (int)(evaluation.numFalsePositives(0) + evaluation.numTruePositives(1)) + ";" +
+                                (int)evaluation.numTrueNegatives(1) + ";" +
+                                (int)evaluation.numFalseNegatives(0) + ";" + (int)evaluation.numFalsePositives(0) + ";" +  
+                                (int)evaluation.numTruePositives(1) + "\n"
                           );
                   /*
                   if(afc == AttributesForClustering.Roc)
@@ -165,12 +185,32 @@ public class FileGenerator {
             evaluation.crossValidateModel(classifier,instances,10,new Random(1),this.forPredictionsPrinting ,this.attsToOutput, this.outputDistribution);
             
             if(instances.numInstances() >= 5){
-                  rocFile.write(dataset.getName() + ";" + dataset.getPath() + ";" + ao + ";" + "N/D" + 
+                  /*rocFile.write(dataset.getName() + ";" + dataset.getPath() + ";" + ao + ";" + "N/D" + 
                                 ";" + "N/D" + ";" + 
                                 df.format(evaluation.weightedAreaUnderROC()) + ";" +
                                 df.format(evaluation.weightedPrecision()) + ";" +
                                 df.format(evaluation.weightedRecall()) + ";" +
                                 df.format(evaluation.weightedFMeasure()) + "\n"
+                          );*/
+                  
+                  rocFile.write(dataset.getName() + ";" + dataset.getPath() + ";" + ao + ";" + "N/D" + 
+                                ";" + "N/D" + ";" + 
+                                df.format(evaluation.weightedAreaUnderROC()) + ";" +
+                                df.format(evaluation.weightedPrecision()) + ";" +
+                                df.format(evaluation.weightedRecall()) + ";" +
+                                df.format(evaluation.weightedFMeasure()) + ";" +
+                                df.format(evaluation.weightedTruePositiveRate()) + ";" +
+                                df.format(evaluation.weightedFalsePositiveRate()) + ";" +
+                                (int)evaluation.numInstances() + ";" +
+                                (int)evaluation.correct() + ";" +
+                                df.format(evaluation.pctCorrect()) + ";" +
+                                (int)evaluation.incorrect() + ";" +
+                                df.format(evaluation.pctIncorrect()) + ";" +
+                                (int)(evaluation.numTrueNegatives(1) + evaluation.numFalseNegatives(0)) + ";" +
+                                (int)(evaluation.numFalsePositives(0) + evaluation.numTruePositives(1)) + ";" +
+                                (int)evaluation.numTrueNegatives(1) + ";" +
+                                (int)evaluation.numFalseNegatives(0) + ";" + (int)evaluation.numFalsePositives(0) + ";" +  
+                                (int)evaluation.numTruePositives(1) + "\n"
                           );
                   /*
                   if(afc == AttributesForClustering.Roc)
@@ -209,6 +249,8 @@ public class FileGenerator {
     public void generateRocFileAndAttributeFile(File[] datasets, File rocFile, File attributeFile, AttributesForClustering afc) throws IOException{
         FileWriter fwRoc = new FileWriter(rocFile);
         FileWriter fwAttribute = new FileWriter(attributeFile);
+        
+        fwRoc.write("Dataset;Path;Algoritmo;AttributeEvaluator;SearchMethod;ROC;Precision;Recall;FMeasure;TP-Rate;FP-Rate;TotalInstancias;InstanciasCorretas;%Corret.;InstanciasIncorretas;%Incorret.;NrInstanciasBuggy;NrInstanciasClean;TP;FP;FN;TN\n");
         
         for(File file: datasets){
             
@@ -328,6 +370,7 @@ public class FileGenerator {
     
     public void generateRocFile(File[] datasets, File rocFile, AttributesForClustering afc) throws IOException{
         FileWriter fwRoc = new FileWriter(rocFile);
+        fwRoc.write("Dataset;Path;Algoritmo;AttributeEvaluator;SearchMethod;ROC;Precision;Recall;FMeasure;TP-Rate;FP-Rate;TotalInstancias;InstanciasCorretas;%Corret.;InstanciasIncorretas;%Incorret.;NrInstanciasBuggy;NrInstanciasClean;TP;FP;FN;TN\n");
         
         for(File file: datasets){
             
